@@ -39,12 +39,13 @@ public class ItemMapper {
         return itemDto.getItem(text, owner);
     }
 
-    public Item putItem(int id, Item item, Integer owner) {
+    public Item putItem(int id, Item item, int owner) {
         log.info("Create new Item: \n{}\nid: {}", item, id);
         if (UserDto.getUser(owner) == null) {
             throw new NotFoundException("The user does not exist id: " + owner);
         }
-        if (itemDto.getItem(id).getOwner() != owner) {
+        int idItemOwen = itemDto.getItem(id).getOwner();
+        if (idItemOwen != owner) {
             throw new NotFoundException("item update with other user id: " + id + " owner: " + owner);
         }
         Item itemMap = itemDto.getItem(id);
