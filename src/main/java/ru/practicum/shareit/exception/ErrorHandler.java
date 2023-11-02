@@ -12,20 +12,6 @@ import ru.practicum.shareit.exception.model.NotFoundException;
 @RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
-//    @ExceptionHandler
-//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-//    public ErrorResponse handlerThrowable(final Throwable e) {
-//        log.error("Error", e);
-//        return new ErrorResponse(e.getMessage());
-//    }
-
-    //    @ExceptionHandler(value = {EqualsUsersIdException.class, ExceptionBlockedUserFriend.class, ExceptionAlreadyInFriends.class})
-//    @ResponseStatus(HttpStatus.CONFLICT)
-//    public ErrorResponse handlerEqualsUsersIdException(final RuntimeException e) {
-//        log.error("Error", e.getMessage());
-//        return new ErrorResponse(e.getMessage());
-//    }
-//
     @ExceptionHandler(value = {BadRequest.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handlerMethodArgumentNotValidationException(final BadRequest e) {

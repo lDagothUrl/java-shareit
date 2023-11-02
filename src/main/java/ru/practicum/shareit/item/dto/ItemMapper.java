@@ -33,7 +33,7 @@ public class ItemMapper {
     }
 
     public List<Item> getItem(String text, Integer owner) {
-        if (text.isBlank()){
+        if (text.isBlank()) {
             return new ArrayList<>();
         }
         return itemDto.getItem(text, owner);
