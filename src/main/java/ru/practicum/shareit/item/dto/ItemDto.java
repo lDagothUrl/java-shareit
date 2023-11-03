@@ -27,7 +27,7 @@ public class ItemDto {
         return itemMap.get(id);
     }
 
-    public List<Item> getItem(String text, Integer owner) {
+    public List<Item> getItem(String text, int owner) {
         List<Item> itemList = new ArrayList<>();
         text = text.toLowerCase();
         for (Item item : itemMap.values()) {
@@ -39,10 +39,11 @@ public class ItemDto {
         return itemList;
     }
 
-    public List<Item> getItems(Integer owner) {
+    public List<Item> getItems(int owner) {
         List<Item> itemList = new ArrayList<>();
         for (Item item : itemMap.values()) {
-            if (item.getOwner() == owner) {
+            int itemOwner = item.getOwner();
+            if (itemOwner == owner) {
                 itemList.add(item);
             }
         }
