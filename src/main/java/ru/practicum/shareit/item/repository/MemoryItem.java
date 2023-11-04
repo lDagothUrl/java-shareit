@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item.dto;
+package ru.practicum.shareit.item.repository;
 
 import ru.practicum.shareit.item.model.Item;
 
@@ -11,7 +11,7 @@ import java.util.Map;
  * TODO Sprint add-controllers.
  */
 
-public class ItemDto {
+public class MemoryItem {
     private final Map<Integer, Item> itemMap = new HashMap<>();
 
     public Item postItem(Item item) {
@@ -23,16 +23,12 @@ public class ItemDto {
         return itemMap.get(id);
     }
 
-    public Item getItem(Integer id, Integer owner) {
-        return itemMap.get(id);
-    }
-
-    public List<Item> getItem(String text, int owner) {
+    public List<Item> getItem(String text) {
         List<Item> itemList = new ArrayList<>();
         text = text.toLowerCase();
         for (Item item : itemMap.values()) {
             String itemStr = (item.getName() + item.getDescription()).toLowerCase();
-            if (itemStr.indexOf(text) >= 0) {
+            if (item.getAvailable() && itemStr.contains(text)) {
                 itemList.add(item);
             }
         }

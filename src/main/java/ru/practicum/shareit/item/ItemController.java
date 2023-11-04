@@ -1,7 +1,7 @@
 package ru.practicum.shareit.item;
 
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.model.Item;
 
 import javax.validation.constraints.NotNull;
@@ -13,7 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/items")
 public class ItemController {
-    private final ItemMapper userMapper = new ItemMapper();
+    private final ItemService userMapper = new ItemService();
 
     @PostMapping
     public Item postItem(@RequestBody Item item, @NotNull @RequestHeader("X-Sharer-User-Id") Integer owner) {
@@ -26,13 +26,13 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public Item getItem(@PathVariable(value = "itemId") int itemId, @NotNull @RequestHeader("X-Sharer-User-Id") Integer owner) {
-        return userMapper.getItem(itemId, owner);
+    public Item getItem(@PathVariable(value = "itemId") Integer itemId, @NotNull @RequestHeader("X-Sharer-User-Id") Integer owner) {
+        return userMapper.getItem(itemId);
     }
 
     @GetMapping("/search{text}")
     public List<Item> getItem(@RequestParam(value = "text") String text, @NotNull @RequestHeader("X-Sharer-User-Id") Integer owner) {
-        return userMapper.getItem(text, owner);
+        return userMapper.getItem(text);
     }
 
     @PatchMapping("/{id}")

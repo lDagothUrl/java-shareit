@@ -1,13 +1,13 @@
-package ru.practicum.shareit.user.dto;
+package ru.practicum.shareit.user.repository;
 
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class UserDto {
+public class MemoryUser {
     private static final Map<Integer, User> userMap = new HashMap<>();
 
     public User postUser(User user) {

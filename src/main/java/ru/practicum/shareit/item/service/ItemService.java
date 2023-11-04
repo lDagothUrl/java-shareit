@@ -1,18 +1,19 @@
-package ru.practicum.shareit.item.dto;
+package ru.practicum.shareit.item.service;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.practicum.shareit.exception.model.BadRequest;
 import ru.practicum.shareit.exception.model.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.item.repository.MemoryItem;
+import ru.practicum.shareit.user.repository.MemoryUser;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class ItemMapper {
+public class ItemService {
 
-    private final ItemDto itemDto = new ItemDto();
+    private final MemoryItem memoryItem = new MemoryItem();
     private int newId;
 
     public Item postItem(Item item, int owner) {
@@ -20,35 +21,35 @@ public class ItemMapper {
         item.setOwner(owner);
         log.info("Create new Item: \n{}", item);
         item.setId(createId());
-        return itemDto.postItem(item);
+        return memoryItem.postItem(item);
     }
 
     public List<Item> getItems(Integer owner) {
-        return itemDto.getItems(owner);
+        return memoryItem.getItems(owner);
     }
 
-    public Item getItem(int id, Integer owner) {
-        Item item = itemDto.getItem(id, owner);
+    public Item getItem(int id) {
+        Item item = memoryItem.getItem(id);
         return item;
     }
 
-    public List<Item> getItem(String text, Integer owner) {
+    public List<Item> getItem(String text) {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        return itemDto.getItem(text, owner);
+        return memoryItem.getItem(text);
     }
 
     public Item putItem(int id, Item item, int owner) {
         log.info("Create new Item: \n{}\nid: {}", item, id);
-        if (UserDto.getUser(owner) == null) {
+        if (MemoryUser.getUser(owner) == null) {
             throw new NotFoundException("The user does not exist id: " + owner);
         }
-        int idItemOwen = itemDto.getItem(id).getOwner();
+        int idItemOwen = memoryItem.getItem(id).getOwner();
         if (idItemOwen != owner) {
             throw new NotFoundException("item update with other user id: " + id + " owner: " + owner);
         }
-        Item itemMap = itemDto.getItem(id);
+        Item itemMap = memoryItem.getItem(id);
         if (item.getName() == null) {
             item.setName(itemMap.getName());
         }
@@ -60,7 +61,7 @@ public class ItemMapper {
         }
         item.setId(id);
         item.setOwner(owner);
-        return itemDto.postItem(item);
+        return memoryItem.postItem(item);
     }
 
 
@@ -78,7 +79,7 @@ public class ItemMapper {
         if (item.getDescription() == null || item.getDescription().isBlank()) {
             throw new BadRequest("Is blank description");
         }
-        if (UserDto.getUser(owner) == null) {
+        if (MemoryUser.getUser(owner) == null) {
             throw new NotFoundException("The user does not exist id: " + owner);
         }
     }
