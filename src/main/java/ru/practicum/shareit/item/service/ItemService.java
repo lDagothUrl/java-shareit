@@ -57,15 +57,15 @@ public class ItemService {
         if (idItemOwen != owner) {
             throw new NotFoundException("item update with other user id: " + id + " owner: " + owner);
         }
-        Item itemСurrent = memoryItem.getItem(id);
+        Item itemOriginal = memoryItem.getItem(id);
         if (item.getName() == null) {
-            item.setName(itemСurrent.getName());
+            item.setName(itemOriginal.getName());
         }
         if (item.getDescription() == null) {
-            item.setDescription(itemСurrent.getDescription());
+            item.setDescription(itemOriginal.getDescription());
         }
         if (item.getAvailable() == null) {
-            item.setAvailable(itemСurrent.getAvailable());
+            item.setAvailable(itemOriginal.getAvailable());
         }
         item.setId(id);
         item.setOwner(owner);

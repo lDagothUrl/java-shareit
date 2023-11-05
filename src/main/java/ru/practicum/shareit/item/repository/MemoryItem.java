@@ -14,7 +14,7 @@ import java.util.Map;
 
 @Repository
 public class MemoryItem {
-    private final static Map<Integer, Item> itemMap = new HashMap<>();
+    private final Map<Integer, Item> itemMap = new HashMap<>();
 
     public Item postItem(Item item) {
         itemMap.put(item.getId(), item);
