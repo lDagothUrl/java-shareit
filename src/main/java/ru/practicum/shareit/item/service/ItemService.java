@@ -38,9 +38,6 @@ public class ItemService {
 
     public ItemDto getItem(int id, int owner) {
         Item item = memoryItem.getItem(id);
-//        if (item.getOwner() != owner) {
-//            throw new NotFoundException("No access");
-//        }
         return ItemMapper.itemToDto(item);
     }
 
@@ -48,9 +45,7 @@ public class ItemService {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        return memoryItem.getItem(text).stream().
-                //filter(item -> item.getOwner() == owner).
-                        map(ItemMapper::itemToDto).collect(Collectors.toList());
+        return memoryItem.getItem(text).stream().map(ItemMapper::itemToDto).collect(Collectors.toList());
     }
 
     public ItemDto putItem(int id, Item item, int owner) {
