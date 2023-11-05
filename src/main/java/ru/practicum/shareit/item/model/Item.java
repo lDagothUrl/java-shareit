@@ -5,12 +5,13 @@ import lombok.*;
 /**
  * TODO Sprint add-controllers.
  */
-@NoArgsConstructor
+
 @AllArgsConstructor
 @Getter
 @Setter
 @EqualsAndHashCode
 @ToString
+@Builder
 public class Item {
     private int id;
     private String name;

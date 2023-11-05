@@ -1,8 +1,10 @@
 package ru.practicum.shareit.item;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.ItemDto;
+import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -12,31 +14,32 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/items")
+@RequiredArgsConstructor
 public class ItemController {
-    private final ItemService userMapper = new ItemService();
+    private final ItemService itemService;
 
     @PostMapping
-    public Item postItem(@RequestBody Item item, @NotNull @RequestHeader("X-Sharer-User-Id") Integer owner) {
-        return userMapper.postItem(item, owner);
+    public ItemDto postItem(@RequestBody Item item, @NotNull @RequestHeader("X-Sharer-User-Id") final Integer owner) {
+        return itemService.postItem(item, owner);
     }
 
     @GetMapping
-    public List<Item> getItems(@NotNull @RequestHeader("X-Sharer-User-Id") Integer owner) {
-        return userMapper.getItems(owner);
+    public List<ItemDto> getItems(@NotNull @RequestHeader("X-Sharer-User-Id") final Integer owner) {
+        return itemService.getItems(owner);
     }
 
     @GetMapping("/{itemId}")
-    public Item getItem(@PathVariable(value = "itemId") Integer itemId, @NotNull @RequestHeader("X-Sharer-User-Id") Integer owner) {
-        return userMapper.getItem(itemId);
+    public ItemDto getItem(@PathVariable(value = "itemId") final Integer itemId, @NotNull @RequestHeader("X-Sharer-User-Id") final Integer owner) {
+        return itemService.getItem(itemId, owner);
     }
 
     @GetMapping("/search{text}")
-    public List<Item> getItem(@RequestParam(value = "text") String text, @NotNull @RequestHeader("X-Sharer-User-Id") Integer owner) {
-        return userMapper.getItem(text);
+    public List<ItemDto> getItem(@RequestParam(value = "text") final String text, @NotNull @RequestHeader("X-Sharer-User-Id") final Integer owner) {
+        return itemService.getItem(text, owner);
     }
 
     @PatchMapping("/{id}")
-    public Item putItem(@PathVariable int id, @RequestBody Item item, @NotNull @RequestHeader("X-Sharer-User-Id") Integer owner) {
-        return userMapper.putItem(id, item, owner);
+    public ItemDto putItem(@PathVariable int id, @RequestBody Item item, @NotNull @RequestHeader("X-Sharer-User-Id") final Integer owner) {
+        return itemService.putItem(id, item, owner);
     }
 }

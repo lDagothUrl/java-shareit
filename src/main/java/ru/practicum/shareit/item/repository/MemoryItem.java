@@ -1,5 +1,7 @@
 package ru.practicum.shareit.item.repository;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.ArrayList;
@@ -11,8 +13,9 @@ import java.util.Map;
  * TODO Sprint add-controllers.
  */
 
+@Repository
 public class MemoryItem {
-    private final Map<Integer, Item> itemMap = new HashMap<>();
+    private final static Map<Integer, Item> itemMap = new HashMap<>();
 
     public Item postItem(Item item) {
         itemMap.put(item.getId(), item);
@@ -27,22 +30,14 @@ public class MemoryItem {
         List<Item> itemList = new ArrayList<>();
         text = text.toLowerCase();
         for (Item item : itemMap.values()) {
-            String itemStr = (item.getName() + item.getDescription()).toLowerCase();
-            if (item.getAvailable() && itemStr.contains(text)) {
+            if (item.getAvailable() && (item.getName().toLowerCase().contains(text) || item.getDescription().toLowerCase().contains(text))) {
                 itemList.add(item);
             }
         }
         return itemList;
     }
 
-    public List<Item> getItems(int owner) {
-        List<Item> itemList = new ArrayList<>();
-        for (Item item : itemMap.values()) {
-            int itemOwner = item.getOwner();
-            if (itemOwner == owner) {
-                itemList.add(item);
-            }
-        }
-        return itemList;
+    public List<Item> getItems() {
+        return new ArrayList<>(itemMap.values());
     }
 }

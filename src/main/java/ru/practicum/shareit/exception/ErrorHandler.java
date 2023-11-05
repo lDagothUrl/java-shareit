@@ -15,14 +15,14 @@ public class ErrorHandler {
     @ExceptionHandler(value = {BadRequest.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handlerMethodArgumentNotValidationException(final BadRequest e) {
-        log.error("Validation {}", e.getMessage());
+        log.error("Validation {}", e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handlerNotFoundException(final NotFoundException e) {
-        log.error("Not found exception {}", e.getMessage());
+        log.error("Not found exception {}", e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
 }

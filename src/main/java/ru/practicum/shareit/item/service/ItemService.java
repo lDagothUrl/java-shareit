@@ -1,72 +1,80 @@
 package ru.practicum.shareit.item.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.model.BadRequest;
 import ru.practicum.shareit.exception.model.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.ItemDto;
+import ru.practicum.shareit.item.model.ItemMapper;
 import ru.practicum.shareit.item.repository.MemoryItem;
 import ru.practicum.shareit.user.repository.MemoryUser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
+@Service
+@RequiredArgsConstructor
 public class ItemService {
 
-    private final MemoryItem memoryItem = new MemoryItem();
+    private final MemoryItem memoryItem;
+    private final MemoryUser memoryUser;
     private int newId;
 
-    public Item postItem(Item item, int owner) {
+    public ItemDto postItem(Item item, int owner) {
         checkItem(item, owner);
         item.setOwner(owner);
         log.info("Create new Item: \n{}", item);
         item.setId(createId());
-        return memoryItem.postItem(item);
+        return ItemMapper.itemToDto(memoryItem.postItem(item));
     }
 
-    public List<Item> getItems(Integer owner) {
-        return memoryItem.getItems(owner);
+    public List<ItemDto> getItems(int owner) {
+        return memoryItem.getItems().stream().filter(item -> item.getOwner() == owner).map(ItemMapper::itemToDto).collect(Collectors.toList());
     }
 
-    public Item getItem(int id) {
+    public ItemDto getItem(int id, int owner) {
         Item item = memoryItem.getItem(id);
-        return item;
+//        if (item.getOwner() != owner) {
+//            throw new NotFoundException("No access");
+//        }
+        return ItemMapper.itemToDto(item);
     }
 
-    public List<Item> getItem(String text) {
+    public List<ItemDto> getItem(String text, int owner) {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        return memoryItem.getItem(text);
+        return memoryItem.getItem(text).stream().
+                //filter(item -> item.getOwner() == owner).
+                        map(ItemMapper::itemToDto).collect(Collectors.toList());
     }
 
-    public Item putItem(int id, Item item, int owner) {
+    public ItemDto putItem(int id, Item item, int owner) {
         log.info("Create new Item: \n{}\nid: {}", item, id);
-        if (MemoryUser.getUser(owner) == null) {
+        if (memoryUser.getUser(owner) == null) {
             throw new NotFoundException("The user does not exist id: " + owner);
         }
         int idItemOwen = memoryItem.getItem(id).getOwner();
         if (idItemOwen != owner) {
             throw new NotFoundException("item update with other user id: " + id + " owner: " + owner);
         }
-        Item itemMap = memoryItem.getItem(id);
+        Item itemСurrent = memoryItem.getItem(id);
         if (item.getName() == null) {
-            item.setName(itemMap.getName());
+            item.setName(itemСurrent.getName());
         }
         if (item.getDescription() == null) {
-            item.setDescription(itemMap.getDescription());
+            item.setDescription(itemСurrent.getDescription());
         }
         if (item.getAvailable() == null) {
-            item.setAvailable(itemMap.getAvailable());
+            item.setAvailable(itemСurrent.getAvailable());
         }
         item.setId(id);
         item.setOwner(owner);
-        return memoryItem.postItem(item);
-    }
-
-
-    private int createId() {
-        return ++newId;
+        return ItemMapper.itemToDto(memoryItem.postItem(item));
     }
 
     private void checkItem(Item item, int owner) {
@@ -79,8 +87,12 @@ public class ItemService {
         if (item.getDescription() == null || item.getDescription().isBlank()) {
             throw new BadRequest("Is blank description");
         }
-        if (MemoryUser.getUser(owner) == null) {
+        if (memoryUser.getUser(owner) == null) {
             throw new NotFoundException("The user does not exist id: " + owner);
         }
+    }
+
+    private int createId() {
+        return ++newId;
     }
 }

@@ -1,35 +1,42 @@
 package ru.practicum.shareit.user.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.model.UserDto;
+import ru.practicum.shareit.user.model.UserMapper;
 import ru.practicum.shareit.user.repository.MemoryUser;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
+@Service
+@RequiredArgsConstructor
 public class ServiceUser {
-    private final MemoryUser memoryUser = new MemoryUser();
+    private final MemoryUser memoryUser;
 
     private int newId;
 
-    public User postUser(User user) {
+    public UserDto postUser(User user) {
         log.info("Create new User: \n{}", user);
         checkDuplicate(user);
         user.setId(createId());
-        return memoryUser.postUser(user);
+        return UserMapper.userToDto(memoryUser.postUser(user));
     }
 
-    public List<User> getUsers() {
+    public List<UserDto> getUsers() {
         log.info("Get all Users");
-        return memoryUser.getUsers();
+        return memoryUser.getUsers().stream().map(UserMapper::userToDto).collect(Collectors.toList());
     }
 
-    public User getUser(int id) {
+    public UserDto getUser(int id) {
         log.info("Get userId: {}", id);
-        return memoryUser.getUser(id);
+        return UserMapper.userToDto(memoryUser.getUser(id));
     }
 
-    public User putUser(int id, User user) {
+    public UserDto putUser(int id, User user) {
         log.info("Put User userId: {}", id);
         checkEmail(user, id);
         User userMap = memoryUser.getUser(id);
@@ -40,16 +47,12 @@ public class ServiceUser {
             user.setEmail(userMap.getEmail());
         }
         user.setId(id);
-        return memoryUser.putUser(user);
+        return UserMapper.userToDto(memoryUser.putUser(user));
     }
 
-    public User delUser(int id) {
+    public UserDto delUser(int id) {
         log.info("Delete userId: {}", id);
-        return memoryUser.delUser(id);
-    }
-
-    private int createId() {
-        return ++newId;
+        return UserMapper.userToDto(memoryUser.delUser(id));
     }
 
     private void checkDuplicate(User user) {
@@ -72,5 +75,9 @@ public class ServiceUser {
                 }
             }
         }
+    }
+
+    private int createId() {
+        return ++newId;
     }
 }

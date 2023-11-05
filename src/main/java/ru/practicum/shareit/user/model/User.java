@@ -17,6 +17,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @ToString
+@Builder
 public class User {
     private Integer id;
     @NotBlank
