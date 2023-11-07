@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
@@ -14,10 +13,9 @@ import javax.validation.constraints.NotNull;
 public class ItemDto {
     private Integer id;
     @NotBlank
-    private final String name;
+    private String name;
     @NotBlank
-    private final String description;
-    @JsonProperty
+    private String description;
     @NotNull
-    private final Boolean available;
+    private Boolean available;
 }
