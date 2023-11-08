@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.model.BadRequestException;
-import ru.practicum.shareit.exception.model.NoAccessException;
 import ru.practicum.shareit.exception.model.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemDto;
@@ -34,26 +33,23 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> getItems(int owner) {
         log.info("Get list item by owner: {}", owner);
-        return memoryItem.getItems().stream().filter(item -> item.getOwner() == owner).map(ItemMapper::itemToDto).collect(Collectors.toList());
+        return memoryItem.getItems(owner).stream().map(ItemMapper::itemToDto).collect(Collectors.toList());
     }
 
     @Override
-    public ItemDto getItem(int id, int owner) {
-        log.info("Get item by owner: {} id: {}", owner, id);
+    public ItemDto getItem(int id) {
+        log.info("Get item by id: {}", id);
         Item item = memoryItem.getItem(id);
-        if (item.getOwner() != owner) {
-            throw new NoAccessException("No access Owner: " + owner + " itemId: " + id);
-        }
         return ItemMapper.itemToDto(item);
     }
 
     @Override
-    public List<ItemDto> getItem(String text, int owner) {
-        log.info("Get list item by owner: {} text: {}", owner, text);
+    public List<ItemDto> getItem(String text) {
+        log.info("Get list item by text: {}", text);
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        return memoryItem.getItem(text).stream().filter(item -> item.getOwner() == owner).map(ItemMapper::itemToDto).collect(Collectors.toList());
+        return memoryItem.getItem(text).stream().map(ItemMapper::itemToDto).collect(Collectors.toList());
     }
 
     @Override

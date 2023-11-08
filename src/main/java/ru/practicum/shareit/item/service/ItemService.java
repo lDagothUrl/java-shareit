@@ -9,9 +9,9 @@ public interface ItemService {
 
     List<ItemDto> getItems(int owner);
 
-    ItemDto getItem(int id, int owner);
+    ItemDto getItem(int id);
 
-    List<ItemDto> getItem(String text, int owner);
+    List<ItemDto> getItem(String text);
 
     ItemDto putItem(int id, ItemDto item, int owner);
 }

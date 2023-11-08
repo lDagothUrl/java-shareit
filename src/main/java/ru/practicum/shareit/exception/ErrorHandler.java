@@ -30,11 +30,4 @@ public class ErrorHandler {
         log.error("Replay exception {}", e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handlerNoAccessException(final NoAccessException e) {
-        log.error("Replay exception {}", e.getMessage(), e);
-        return new ErrorResponse(e.getMessage());
-    }
 }

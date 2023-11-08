@@ -12,7 +12,7 @@ public interface MemoryItem {
 
     List<Item> getItem(String text);
 
-    List<Item> getItems();
+    List<Item> getItems(int owner);
 
     Item putItem(int id, ItemDto itemDto, int owner);
 }

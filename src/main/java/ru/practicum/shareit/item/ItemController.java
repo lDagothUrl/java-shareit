@@ -28,13 +28,13 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItem(@PathVariable(value = "itemId") final Integer itemId, @NotNull @RequestHeader("X-Sharer-User-Id") final Integer owner) {
-        return itemService.getItem(itemId, owner);
+    public ItemDto getItem(@PathVariable(value = "itemId") final Integer itemId) {
+        return itemService.getItem(itemId);
     }
 
     @GetMapping("/search{text}")
-    public List<ItemDto> getItem(@RequestParam(value = "text") final String text, @NotNull @RequestHeader("X-Sharer-User-Id") final Integer owner) {
-        return itemService.getItem(text, owner);
+    public List<ItemDto> getItem(@RequestParam(value = "text") final String text) {
+        return itemService.getItem(text);
     }
 
     @PatchMapping("/{id}")
