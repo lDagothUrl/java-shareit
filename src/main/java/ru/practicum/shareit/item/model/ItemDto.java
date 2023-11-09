@@ -2,20 +2,20 @@ package ru.practicum.shareit.item.model;
 
 import lombok.*;
 
-/**
- * TODO Sprint add-controllers.
- */
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @AllArgsConstructor
 @Getter
 @Setter
 @EqualsAndHashCode
 @ToString
-@Builder
-public class Item {
-    private int id;
+public class ItemDto {
+    private Integer id;
+    @NotBlank
     private String name;
+    @NotBlank
     private String description;
+    @NotNull
     private Boolean available;
-    private Integer owner;
 }
