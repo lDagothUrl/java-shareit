@@ -13,5 +13,5 @@ public interface UserService {
 
     UserDto putUser(int id, UserDto user);
 
-    UserDto delUser(int id);
+    void delUser(int id);
 }

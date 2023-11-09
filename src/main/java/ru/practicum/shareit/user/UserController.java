@@ -29,18 +29,18 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public UserDto getUser(@PathVariable int id) {
+    public UserDto getUser(@PathVariable Integer id) {
         return userService.getUser(id);
     }
 
     @PatchMapping("/{id}")
-    public UserDto putUser(@PathVariable int id, @RequestBody UserDto user) {
+    public UserDto putUser(@PathVariable Integer id, @RequestBody UserDto user) {
         return userService.putUser(id, user);
     }
 
     @DeleteMapping("/{id}")
-    public UserDto delUser(@PathVariable int id) {
-        return userService.delUser(id);
+    public void delUser(@PathVariable Integer id) {
+        userService.delUser(id);
     }
 
 }
