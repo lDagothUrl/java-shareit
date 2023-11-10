@@ -137,7 +137,7 @@ public class BookingServiceImpl implements BookingService {
         try {
             state = BookingState.valueOf(stateString);
         } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Unknown state: UNSUPPORTED_STATUS");
+            throw new BadRequestException("Unknown state: " + stateString);
         }
         if (!memoryUser.existsById(userId)) {
             throw new NotFoundException("Not found userId: " + userId);
