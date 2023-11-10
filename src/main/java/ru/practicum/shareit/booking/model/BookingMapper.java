@@ -6,6 +6,7 @@ import ru.practicum.shareit.user.model.User;
 import static ru.practicum.shareit.item.model.item.ItemMapper.itemToDto;
 import static ru.practicum.shareit.user.model.UserMapper.userToDto;
 
+
 public class BookingMapper {
     public static BookingDtoOutgoing bookingToDtoOutgoing(Booking booking) {
         return new BookingDtoOutgoing(

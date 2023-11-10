@@ -19,9 +19,9 @@ public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @Column(length = 128)
+    @Column(length = 60)
     private String name;
-    @Column(length = 1000)
+    @Column(length = 500)
     private String description;
     @Column(name = "is_available")
     private Boolean isAvailable;

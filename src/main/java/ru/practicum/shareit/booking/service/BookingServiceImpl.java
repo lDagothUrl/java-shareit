@@ -6,10 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.*;
 import ru.practicum.shareit.booking.repository.MemoryBooking;
-import ru.practicum.shareit.exception.model.BadRequestException;
-import ru.practicum.shareit.exception.model.BookingTimeException;
-import ru.practicum.shareit.exception.model.NoAccessException;
-import ru.practicum.shareit.exception.model.NotFoundException;
+import ru.practicum.shareit.exception.model.*;
 import ru.practicum.shareit.item.model.item.Item;
 import ru.practicum.shareit.item.repository.MemoryItem;
 import ru.practicum.shareit.user.model.User;
@@ -32,19 +29,18 @@ public class BookingServiceImpl implements BookingService {
     private final MemoryItem memoryItem;
 
     @Override
-    public BookingDtoOutgoing postBooking(BookingDtoDefault bookingDtoDefault, int id) {
-        log.info("Post booking: {}", bookingDtoDefault);
-        bookingDtoDefault.setBookerId(id);
+    public BookingDtoOutgoing postBooking(BookingDtoDefault bookingDtoDefault, int userId) {
+        log.info("Post booking: {} id: {}", bookingDtoDefault, userId);
+        bookingDtoDefault.setBookerId(userId);
         bookingDtoDefault.setStatus(BookingStatus.WAITING);
-        int userId = bookingDtoDefault.getBookerId();
         Optional<User> userOptional = memoryUser.findById(userId);
         if (userOptional.isEmpty()) {
-            throw new NotFoundException("Not found userId: " + userId);
+            throw new NotFoundUserException("Not found userId: " + userId);
         }
         int itemId = bookingDtoDefault.getItemId();
         Optional<Item> itemOptional = memoryItem.findById(itemId);
         if (itemOptional.isEmpty()) {
-            throw new NotFoundException("Not found itemId: " + itemId);
+            throw new NotFoundItemException("Not found itemId: " + itemId);
         }
         Item item = itemOptional.get();
         if (item.getOwner().getId() == userId) {
@@ -56,10 +52,7 @@ public class BookingServiceImpl implements BookingService {
         if (!bookingDtoDefault.getEnd().isAfter(bookingDtoDefault.getStart())) {
             throw new BookingTimeException("The end of the booking is later than the beginning");
         }
-
-        Booking booking = memoryBooking.save(
-                bookingFromDto(bookingDtoDefault, userOptional.get(), item)
-        );
+        Booking booking = memoryBooking.save(bookingFromDto(bookingDtoDefault, userOptional.get(), item));
         return bookingToDtoOutgoing(booking);
     }
 
@@ -104,7 +97,7 @@ public class BookingServiceImpl implements BookingService {
         try {
             state = BookingState.valueOf(stateString);
         } catch (IllegalArgumentException e) {
-            throw new BadRequestException(stateString);
+            throw new BadRequestException("Unknown state: " + stateString);
         }
         if (!memoryUser.existsById(userId))
             throw new NotFoundException("Not found userId: " + userId);
@@ -144,7 +137,7 @@ public class BookingServiceImpl implements BookingService {
         try {
             state = BookingState.valueOf(stateString);
         } catch (IllegalArgumentException e) {
-            throw new BadRequestException(stateString);
+            throw new BadRequestException("Unknown state: UNSUPPORTED_STATUS");
         }
         if (!memoryUser.existsById(userId)) {
             throw new NotFoundException("Not found userId: " + userId);

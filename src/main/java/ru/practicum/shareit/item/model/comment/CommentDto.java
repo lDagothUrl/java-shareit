@@ -6,10 +6,7 @@ import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
-@Getter
-@Setter
-@EqualsAndHashCode
-@ToString
+@Data
 public class CommentDto {
     private Integer id;
     @NotBlank

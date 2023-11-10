@@ -115,9 +115,8 @@ public class ItemServiceImpl implements ItemService {
         if (itemOptional.isEmpty()) throw new NotFoundException("Not found itemId: " + itemId);
         Item oldItem = itemOptional.get();
         User owner = oldItem.getOwner();
-        if (owner.getId() != userId) throw new NoAccessException("No access userId: " + userId + " itemId: " + itemId);
+        if (owner.getId() != userId) throw new OwnerItemException("No access userId: " + userId + " itemId: " + itemId);
         Item updateItem = ItemMapper.itemFromDto(itemDto, owner);
-
         String name = updateItem.getName();
         String description = updateItem.getDescription();
         if (name == null || name.isBlank()) {
