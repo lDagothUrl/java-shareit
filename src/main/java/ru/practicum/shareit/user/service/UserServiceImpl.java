@@ -13,7 +13,6 @@ import ru.practicum.shareit.user.model.UserMapper;
 import ru.practicum.shareit.user.repository.MemoryUser;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.user.model.UserMapper.userToDto;
@@ -21,6 +20,7 @@ import static ru.practicum.shareit.user.model.UserMapper.userToDto;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
     private final MemoryUser memoryUser;
 
@@ -46,11 +46,8 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public UserDto getUser(int id) {
         log.info("Get userId: {}", id);
-        Optional<User> userOptional = memoryUser.findById(id);
-        if (userOptional.isEmpty()) {
-            throw new NotFoundException("Not found user id: " + id);
-        }
-        User user = userOptional.get();
+        User user = memoryUser.findById(id)
+                .orElseThrow(() -> new NotFoundException("Not found user id: " + id));
         return UserMapper.userToDto(user);
     }
 
@@ -58,13 +55,10 @@ public class UserServiceImpl implements UserService {
     public UserDto putUser(int userId, UserDto userDto) {
         log.info("Put User userId: {}, user: ", userId, userDto);
         userDto.setId(userId);
+        User oldUser = memoryUser.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Not found user id: " + userId));
+        User updateUser = UserMapper.dtoToUser(userDto);
         try {
-            Optional<User> userOptional = memoryUser.findById(userId);
-            if (userOptional.isEmpty()) {
-                throw new NotFoundException("Not found user id: " + userId);
-            }
-            User oldUser = userOptional.get();
-            User updateUser = UserMapper.dtoToUser(userDto);
             String email = updateUser.getEmail();
             String name = updateUser.getName();
             if (email == null || email.isBlank()) {

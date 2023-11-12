@@ -19,9 +19,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.MemoryUser;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.item.model.comment.CommentMapper.commentFromDto;
@@ -31,6 +29,7 @@ import static ru.practicum.shareit.item.model.item.ItemMapper.itemToDto;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ItemServiceImpl implements ItemService {
 
     private final MemoryItem memoryItem;
@@ -42,25 +41,32 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto postItem(ItemDto itemDto, int userId) {
         log.info("Create new Item: \n{}\nowner: {}", itemDto, userId);
-        Optional<User> userOptional = memoryUser.findById(userId);
-        if (userOptional.isEmpty()) {
-            throw new NotFoundUserException("Not found userId: " + userId);
-        }
-        Item item = memoryItem.save(ItemMapper.itemFromDto(itemDto, userOptional.get()));
+        User user = memoryUser.findById(userId)
+                .orElseThrow(() -> new NotFoundUserException("Not found userId: " + userId));
+        Item item = memoryItem.save(ItemMapper.itemFromDto(itemDto, user));
         return itemToDto(item, null, null, null);
     }
 
     @Override
     public CommentDto postComment(int userId, int itemId, CommentDto commentDto) {
         log.info("Create comment userId: {} itemId: {} comment:\n{}", userId, itemId, commentDto);
-        Optional<User> authorOptional = memoryUser.findById(userId);
-        if (authorOptional.isEmpty()) throw new NotFoundUserException("Not found userId: " + userId);
-        User author = authorOptional.get();
-        Optional<Item> itemOptional = memoryItem.findById(itemId);
-        if (itemOptional.isEmpty()) throw new NotFoundItemException("Not found itemId: " + itemId);
-        Item item = itemOptional.get();
-        if (!memoryBooking.existsByBookerIdAndItemIdAndEndBefore(userId, itemId, LocalDateTime.now()))
+        User author = memoryUser.findById(userId)
+                .orElseThrow(() -> new NotFoundUserException("Not found userId: " + userId));
+        Item item = memoryItem.findById(itemId)
+                .orElseThrow(() -> new NotFoundItemException("Not found itemId: " + itemId));
+        Booking booking = null;
+        try {
+            booking = memoryBooking.findByIdAndItemOwnerId(itemId, userId).orElseThrow(() -> new NotFoundException("Not found booking itemId: " + itemId + " userId: " + userId));
+        } catch (NotFoundException e) {
+            log.info(e.getMessage());
+        }
+        BookingStatus status = BookingStatus.APPROVED;
+        if (booking != null) {
+            status = booking.getStatus();
+        }
+        if (status != BookingStatus.APPROVED || !memoryBooking.existsByBookerIdAndItemIdAndEndBefore(userId, itemId, LocalDateTime.now())) {
             throw new BookingTimeException("Error booking");
+        }
         Comment comment = memoryComment.save(commentFromDto(commentDto, item, author));
         return commentToDto(comment, author.getName());
     }
@@ -82,11 +88,8 @@ public class ItemServiceImpl implements ItemService {
     @Transactional(readOnly = true)
     public ItemDto getItem(int userId, int itemId) {
         log.info("Get item userId: {} itemId: {}", userId, itemId);
-        Optional<Item> itemOptional = memoryItem.findById(itemId);
-        if (itemOptional.isEmpty()) {
-            throw new NotFoundException("Not found itemId: " + itemId);
-        }
-        Item item = itemOptional.get();
+        Item item = memoryItem.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Not found itemId: " + itemId));
         Booking last = null;
         Booking next = null;
         if (item.getOwner().getId() == userId) {
@@ -111,11 +114,12 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto putItem(int itemId, ItemDto itemDto, int userId) {
         log.info("Put item: \n{}\nitemId: {}\nuserId: {}", itemDto, itemId, userId);
         itemDto.setId(itemId);
-        Optional<Item> itemOptional = memoryItem.findById(itemId);
-        if (itemOptional.isEmpty()) throw new NotFoundException("Not found itemId: " + itemId);
-        Item oldItem = itemOptional.get();
+        Item oldItem = memoryItem.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Not found itemId: " + itemId));
         User owner = oldItem.getOwner();
-        if (owner.getId() != userId) throw new OwnerItemException("No access userId: " + userId + " itemId: " + itemId);
+        if (owner.getId() != userId) {
+            throw new OwnerItemException("No access userId: " + userId + " itemId: " + itemId);
+        }
         Item updateItem = ItemMapper.itemFromDto(itemDto, owner);
         String name = updateItem.getName();
         String description = updateItem.getDescription();
@@ -135,7 +139,9 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public void deleteItem(int userId, int itemId) {
         log.info("Del item itemId: {} userId: {}", itemId, userId);
-        if (!memoryUser.existsById(userId)) throw new NotFoundUserException("Not found userId: " + userId);
+        if (!memoryUser.existsById(userId)) {
+            throw new NotFoundUserException("Not found userId: " + userId);
+        }
         memoryItem.deleteById(itemId);
     }
 }
