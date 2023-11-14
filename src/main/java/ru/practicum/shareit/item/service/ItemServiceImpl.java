@@ -74,7 +74,7 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundUserException("Not found userId: " + userId);
         }
         List<Item> itemList = memoryItem.findByOwnerId(userId);
-        List<Booking> bookingList = memoryBooking.findAllByItemOwnerIdInAndStatusNotOrderByStartDesc(itemList.stream().map(item -> item.getOwner().getId()).collect(Collectors.toList()), BookingStatus.REJECTED);//.stream().filter(booking -> booking.getStatus() == BookingStatus.APPROVED).collect(Collectors.toList());
+        List<Booking> bookingList = memoryBooking.findAllByItemOwnerIdInAndStatusNotOrderByStart(itemList.stream().map(item -> item.getOwner().getId()).collect(Collectors.toList()), BookingStatus.REJECTED);//.stream().filter(booking -> booking.getStatus() == BookingStatus.APPROVED).collect(Collectors.toList());
         List<ItemDto> itemDtoList = new ArrayList<>();
         for (Item item : itemList) {
             Booking last = null;

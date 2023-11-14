@@ -39,5 +39,5 @@ public interface MemoryBooking extends JpaRepository<Booking, Integer> {
 
     List<Booking> findByBookerIdAndItemId(int bookerId, int itemId);
 
-    List<Booking> findAllByItemOwnerIdInAndStatusNotOrderByStartDesc(List<Integer> ownerId, BookingStatus status);
+    List<Booking> findAllByItemOwnerIdInAndStatusNotOrderByStart(List<Integer> ownerId, BookingStatus status);
 }
