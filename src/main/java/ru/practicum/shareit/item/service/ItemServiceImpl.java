@@ -79,8 +79,6 @@ public class ItemServiceImpl implements ItemService {
         for (Item item : itemList) {
             Booking last = null;
             Booking next = null;
-            int lastIndex = -1;
-            int nextIndex = -1;
             int i = 2;
             for (int j = 0; j < bookingList.size(); j++) {
                 Booking booking = bookingList.get(j);
@@ -91,18 +89,10 @@ public class ItemServiceImpl implements ItemService {
                     i--;
                     if (i == 1) {
                         last = booking;
-                        lastIndex = j;
                     } else {
                         next = booking;
-                        nextIndex = j;
                     }
                 }
-            }
-            if (nextIndex != -1) {
-                bookingList.remove(nextIndex);
-            }
-            if (lastIndex != -1) {
-                bookingList.remove(lastIndex);
             }
             itemDtoList.add(itemToDto(item, last, next, memoryComment.findByItemIdOrderByCreatedDesc(item.getId()).stream().map(comment -> commentToDto(comment, comment.getAuthor().getName())).collect(Collectors.toList())));
         }
