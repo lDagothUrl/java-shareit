@@ -19,7 +19,9 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.MemoryUser;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.item.model.comment.CommentMapper.commentFromDto;
@@ -54,17 +56,10 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new NotFoundUserException("Not found userId: " + userId));
         Item item = memoryItem.findById(itemId)
                 .orElseThrow(() -> new NotFoundItemException("Not found itemId: " + itemId));
-        Booking booking = null;
-        try {
-            booking = memoryBooking.findByIdAndItemOwnerId(itemId, userId).orElseThrow(() -> new NotFoundException("Not found booking itemId: " + itemId + " userId: " + userId));
-        } catch (NotFoundException e) {
-            log.info(e.getMessage());
-        }
-        BookingStatus status = BookingStatus.APPROVED;
-        if (booking != null) {
-            status = booking.getStatus();
-        }
-        if (status != BookingStatus.APPROVED || !memoryBooking.existsByBookerIdAndItemIdAndEndBefore(userId, itemId, LocalDateTime.now())) {
+        boolean approvedBookingFound = memoryBooking.findByBookerIdAndItemId(userId, itemId)
+                .stream()
+                .map(Booking::getStatus).noneMatch(BookingStatus.APPROVED::equals);
+        if (approvedBookingFound || !memoryBooking.existsByBookerIdAndItemIdAndEndBefore(userId, itemId, LocalDateTime.now())) {
             throw new BookingTimeException("Error booking");
         }
         Comment comment = memoryComment.save(commentFromDto(commentDto, item, author));
@@ -78,10 +73,40 @@ public class ItemServiceImpl implements ItemService {
         if (!memoryUser.existsById(userId)) {
             throw new NotFoundUserException("Not found userId: " + userId);
         }
-        return memoryItem.findByOwnerId(userId).stream().map(item -> {
-            LocalDateTime now = LocalDateTime.now();
-            return itemToDto(item, memoryBooking.findFirstByItemIdAndStatusNotAndStartBeforeOrderByStartDesc(item.getId(), BookingStatus.REJECTED, now), memoryBooking.findFirstByItemIdAndStatusNotAndStartAfterOrderByStartAsc(item.getId(), BookingStatus.REJECTED, now), memoryComment.findByItemIdOrderByCreatedDesc(item.getId()).stream().map(comment -> commentToDto(comment, comment.getAuthor().getName())).collect(Collectors.toList()));
-        }).collect(Collectors.toList());
+        List<Item> itemList = memoryItem.findByOwnerId(userId);
+        List<Booking> bookingList = memoryBooking.findAllByItemOwnerIdInAndStatusNotOrderByStartDesc(itemList.stream().map(item -> item.getOwner().getId()).collect(Collectors.toList()), BookingStatus.REJECTED);//.stream().filter(booking -> booking.getStatus() == BookingStatus.APPROVED).collect(Collectors.toList());
+        List<ItemDto> itemDtoList = new ArrayList<>();
+        for (Item item : itemList) {
+            Booking last = null;
+            Booking next =  null;
+            int lastIndex = -1;
+            int nextIndex = -1;
+            int i = 2;
+            for (int j = 0; j < bookingList.size(); j++){
+                Booking booking = bookingList.get(j);
+                if (i == 0){
+                    break;
+                }
+                if (booking.getItem().equals(item)){
+                    i--;
+                    if (i == 1){
+                        last = booking;
+                        lastIndex = j;
+                    }else if(i == 0){
+                        next = booking;
+                        nextIndex = j;
+                    }
+                }
+            }
+            if (nextIndex != -1){
+                bookingList.remove(nextIndex);
+            }
+            if (lastIndex != -1){
+                bookingList.remove(lastIndex);
+            }
+            itemDtoList.add(itemToDto(item, last, next, memoryComment.findByItemIdOrderByCreatedDesc(item.getId()).stream().map(comment -> commentToDto(comment, comment.getAuthor().getName())).collect(Collectors.toList())));
+        }
+        return itemDtoList;
     }
 
     @Override
