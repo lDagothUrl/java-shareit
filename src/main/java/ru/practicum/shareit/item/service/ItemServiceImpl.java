@@ -78,30 +78,30 @@ public class ItemServiceImpl implements ItemService {
         List<ItemDto> itemDtoList = new ArrayList<>();
         for (Item item : itemList) {
             Booking last = null;
-            Booking next =  null;
+            Booking next = null;
             int lastIndex = -1;
             int nextIndex = -1;
             int i = 2;
-            for (int j = 0; j < bookingList.size(); j++){
+            for (int j = 0; j < bookingList.size(); j++) {
                 Booking booking = bookingList.get(j);
-                if (i == 0){
+                if (i == 0) {
                     break;
                 }
-                if (booking.getItem().equals(item)){
+                if (booking.getItem().equals(item)) {
                     i--;
-                    if (i == 1){
+                    if (i == 1) {
                         last = booking;
                         lastIndex = j;
-                    }else if(i == 0){
+                    } else {
                         next = booking;
                         nextIndex = j;
                     }
                 }
             }
-            if (nextIndex != -1){
+            if (nextIndex != -1) {
                 bookingList.remove(nextIndex);
             }
-            if (lastIndex != -1){
+            if (lastIndex != -1) {
                 bookingList.remove(lastIndex);
             }
             itemDtoList.add(itemToDto(item, last, next, memoryComment.findByItemIdOrderByCreatedDesc(item.getId()).stream().map(comment -> commentToDto(comment, comment.getAuthor().getName())).collect(Collectors.toList())));
