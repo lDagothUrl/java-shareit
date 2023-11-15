@@ -2,10 +2,7 @@ package ru.practicum.shareit.user.model;
 
 import lombok.*;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.persistence.*;
 import java.util.Objects;
 
 /**
@@ -18,13 +15,15 @@ import java.util.Objects;
 @Setter
 @ToString
 @Builder
+@Table(name = "users")
+@Entity
 public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @NotBlank
-    @Size(max = 100)
+    @Column(length = 60)
     private String name;
-    @Email
-    @NotNull
+    @Column(length = 60, unique = true)
     private String email;
 
     @Override

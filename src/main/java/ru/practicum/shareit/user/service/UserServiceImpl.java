@@ -2,65 +2,81 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.model.NotFoundException;
+import ru.practicum.shareit.exception.model.ReplayException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.model.UserDto;
 import ru.practicum.shareit.user.model.UserMapper;
 import ru.practicum.shareit.user.repository.MemoryUser;
-import ru.practicum.shareit.exception.model.ReplayException;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ru.practicum.shareit.user.model.UserMapper.userToDto;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
     private final MemoryUser memoryUser;
 
-    public UserDto postUser(UserDto user) {
-        log.info("Create new User: \n{}", user);
-        checkDuplicate(user);
-        return UserMapper.userToDto(memoryUser.postUser(user));
+    @Override
+    public UserDto postUser(UserDto userDto) {
+        log.info("Create new User: \n{}", userDto);
+        try {
+            User user = memoryUser.save(UserMapper.dtoToUser(userDto));
+            return userToDto(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new ReplayException("The userEmail already exists");
+        }
     }
 
+    @Override
+    @Transactional(readOnly = true)
     public List<UserDto> getUsers() {
         log.info("Get all Users");
-        return memoryUser.getUsers().stream().map(UserMapper::userToDto).collect(Collectors.toList());
+        return memoryUser.findAll().stream().map(UserMapper::userToDto).collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(readOnly = true)
     public UserDto getUser(int id) {
         log.info("Get userId: {}", id);
-        return UserMapper.userToDto(memoryUser.getUser(id));
+        User user = memoryUser.findById(id)
+                .orElseThrow(() -> new NotFoundException("Not found user id: " + id));
+        return UserMapper.userToDto(user);
     }
 
-    public UserDto putUser(int id, UserDto user) {
-        log.info("Put User userId: {}", id);
-        for (User userCheck : memoryUser.getUsers()) {
-            if (id != userCheck.getId() && userCheck.getEmail().equals(user.getEmail())) {
-                throw new ReplayException("The userEmail already exists");
+    @Override
+    public UserDto putUser(int userId, UserDto userDto) {
+        log.info("Put User userId: {}, user: ", userId, userDto);
+        userDto.setId(userId);
+        User oldUser = memoryUser.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Not found user id: " + userId));
+        User updateUser = UserMapper.dtoToUser(userDto);
+        try {
+            String email = updateUser.getEmail();
+            String name = updateUser.getName();
+            if (email == null || email.isBlank()) {
+                updateUser.setEmail(oldUser.getEmail());
             }
+            if (name == null || name.isBlank()) {
+                updateUser.setName(oldUser.getName());
+            }
+            User user = memoryUser.save(updateUser);
+            return userToDto(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new ReplayException("The userEmail already exists");
         }
-        User userMap = memoryUser.getUser(id);
-        if (user.getName() == null) {
-            user.setName(userMap.getName());
-        }
-        if (user.getEmail() == null) {
-            user.setEmail(userMap.getEmail());
-        }
-        return UserMapper.userToDto(memoryUser.putUser(id, user));
     }
 
-    public UserDto delUser(int id) {
+    @Override
+    public void delUser(int id) {
         log.info("Delete userId: {}", id);
-        return UserMapper.userToDto(memoryUser.delUser(id));
-    }
-
-    private void checkDuplicate(UserDto user) {
-        for (User userCheck : memoryUser.getUsers()) {
-            if (userCheck.getEmail().equals(user.getEmail()) && userCheck.getName().equals(user.getName())) {
-                throw new ReplayException("The user already exists");
-            }
-        }
+        memoryUser.deleteById(id);
     }
 }

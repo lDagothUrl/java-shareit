@@ -10,16 +10,16 @@ import ru.practicum.shareit.exception.model.*;
 @RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
-    @ExceptionHandler
+    @ExceptionHandler(value = {BadRequestException.class, BookingTimeException.class, NoAccessException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handlerBadRequestException(final BadRequestException e) {
+    public ErrorResponse handlerBadRequestException(final RuntimeException e) {
         log.error("Validation {}", e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(value = {NotFoundUserException.class, NotFoundItemException.class, NotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handlerNotFoundException(final NotFoundException e) {
+    public ErrorResponse handlerNotFoundException(final RuntimeException e) {
         log.error("Not found exception {}", e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
@@ -28,6 +28,13 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handlerReplayException(final ReplayException e) {
         log.error("Replay exception {}", e.getMessage(), e);
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler({OwnerItemException.class})
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleOwnerItemException(RuntimeException e) {
+        log.error(e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
 }
