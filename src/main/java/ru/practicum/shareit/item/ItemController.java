@@ -7,6 +7,8 @@ import ru.practicum.shareit.item.model.item.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 /**
@@ -19,37 +21,62 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public ItemDto postItem(@RequestHeader("X-Sharer-User-Id") int userId, @RequestBody @Valid ItemDto itemDto) {
+    public ItemDto postItem(
+            @RequestHeader("X-Sharer-User-Id") int userId,
+            @RequestBody @Valid ItemDto itemDto
+    ) {
         return itemService.postItem(itemDto, userId);
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDto postComment(@RequestHeader("X-Sharer-User-Id") Integer userId, @PathVariable Integer itemId, @RequestBody @Valid CommentDto commentDto) {
+    public CommentDto postComment(
+            @RequestHeader("X-Sharer-User-Id") Integer userId,
+            @PathVariable Integer itemId,
+            @RequestBody @Valid CommentDto commentDto
+    ) {
         return itemService.postComment(userId, itemId, commentDto);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@RequestHeader("X-Sharer-User-Id") Integer userId, @PathVariable Integer itemId) {
+    public ItemDto getItemById(
+            @RequestHeader("X-Sharer-User-Id") Integer userId,
+            @PathVariable Integer itemId
+    ) {
         return itemService.getItem(userId, itemId);
     }
 
     @GetMapping
-    public List<ItemDto> getItemsUser(@RequestHeader("X-Sharer-User-Id") Integer userId) {
-        return itemService.getItems(userId);
+    public List<ItemDto> getItemsUser(
+            @RequestHeader("X-Sharer-User-Id") int userId,
+            @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+            @RequestParam(defaultValue = "10") @Positive int size
+    ) {
+        return itemService.getItems(userId, from, size);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> getItems(@RequestParam String text) {
-        return itemService.getItem(text);
+    public List<ItemDto> getItems(
+            @RequestParam String text,
+            @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+            @RequestParam(defaultValue = "10") @Positive int size
+    ) {
+        return itemService.getItem(text, from, size);
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto putItem(@RequestHeader("X-Sharer-User-Id") Integer userId, @PathVariable Integer itemId, @RequestBody ItemDto itemDto) {
+    public ItemDto putItem(
+            @RequestHeader("X-Sharer-User-Id") Integer userId,
+            @PathVariable Integer itemId,
+            @RequestBody ItemDto itemDto
+    ) {
         return itemService.putItem(itemId, itemDto, userId);
     }
 
     @DeleteMapping("/{itemId}")
-    public void deleteItem(@RequestHeader("X-Sharer-User-Id") Integer userId, @PathVariable Integer itemId) {
+    public void deleteItem(
+            @RequestHeader("X-Sharer-User-Id") Integer userId,
+            @PathVariable Integer itemId
+    ) {
         itemService.deleteItem(userId, itemId);
     }
 }

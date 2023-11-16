@@ -2,6 +2,8 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
@@ -15,6 +17,8 @@ import ru.practicum.shareit.item.model.item.ItemDto;
 import ru.practicum.shareit.item.model.item.ItemMapper;
 import ru.practicum.shareit.item.repository.MemoryComment;
 import ru.practicum.shareit.item.repository.MemoryItem;
+import ru.practicum.shareit.request.model.Request;
+import ru.practicum.shareit.request.repository.MemoryRequest;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.MemoryUser;
 
@@ -38,6 +42,7 @@ public class ItemServiceImpl implements ItemService {
     private final MemoryUser memoryUser;
     private final MemoryBooking memoryBooking;
     private final MemoryComment memoryComment;
+    private final MemoryRequest memoryRequest;
 
 
     @Override
@@ -45,7 +50,7 @@ public class ItemServiceImpl implements ItemService {
         log.info("Create new Item: \n{}\nowner: {}", itemDto, userId);
         User user = memoryUser.findById(userId)
                 .orElseThrow(() -> new NotFoundUserException("Not found userId: " + userId));
-        Item item = memoryItem.save(ItemMapper.itemFromDto(itemDto, user));
+        Item item = memoryItem.save(ItemMapper.itemFromDto(itemDto, user, getRequest(itemDto.getRequestId())));
         return itemToDto(item, null, null, null);
     }
 
@@ -68,12 +73,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> getItems(int userId) {
+    public List<ItemDto> getItems(int userId, int from, int size) {
         log.info("Get list item by userId: {}", userId);
         if (!memoryUser.existsById(userId)) {
             throw new NotFoundUserException("Not found userId: " + userId);
         }
-        List<Item> itemList = memoryItem.findByOwnerId(userId);
+        List<Item> itemList = memoryItem.findByOwnerId(userId, getPageable(from, size));
         List<Booking> bookingList = memoryBooking.findAllByItemOwnerIdInAndStatusNotOrderByStart(itemList.stream().map(item -> item.getOwner().getId()).collect(Collectors.toList()), BookingStatus.REJECTED);//.stream().filter(booking -> booking.getStatus() == BookingStatus.APPROVED).collect(Collectors.toList());
         List<ItemDto> itemDtoList = new ArrayList<>();
         for (Item item : itemList) {
@@ -117,12 +122,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getItem(String text) {
+    public List<ItemDto> getItem(String text, int from, int size) {
         log.info("Get list item by text: {}", text);
         if (text.isBlank()) {
             return Collections.emptyList();
         }
-        return memoryItem.findByText(text).stream().map(item -> itemToDto(item, null, null, null)).collect(Collectors.toList());
+        return memoryItem.findByText(text, getPageable(from, size)).stream().map(item -> itemToDto(item, null, null, null)).collect(Collectors.toList());
     }
 
     @Override
@@ -135,7 +140,7 @@ public class ItemServiceImpl implements ItemService {
         if (owner.getId() != userId) {
             throw new OwnerItemException("No access userId: " + userId + " itemId: " + itemId);
         }
-        Item updateItem = ItemMapper.itemFromDto(itemDto, owner);
+        Item updateItem = ItemMapper.itemFromDto(itemDto, owner, getRequest(itemDto.getRequestId()));
         String name = updateItem.getName();
         String description = updateItem.getDescription();
         if (name == null || name.isBlank()) {
@@ -158,5 +163,20 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundUserException("Not found userId: " + userId);
         }
         memoryItem.deleteById(itemId);
+    }
+
+
+    private Pageable getPageable(int from, int size) {
+        int page = from / size;
+        return PageRequest.of(page, size);
+    }
+
+    private Request getRequest(Integer requestId) {
+        Request itemRequest = null;
+        if (requestId != null) {
+            itemRequest = memoryRequest.findById(requestId)
+                    .orElseThrow(() -> new NotFoundException("Not found request requestId: " + requestId));
+        }
+        return itemRequest;
     }
 }
