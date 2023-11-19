@@ -218,8 +218,8 @@ public class ItemServiceTest {
                 .when(memoryUser.findById(anyInt()))
                 .thenReturn(Optional.empty());
 
-        NotFoundUserException e = Assertions.assertThrows(
-                NotFoundUserException.class,
+        NewEx e = Assertions.assertThrows(
+                NewEx.class,
                 () -> itemService.postItem(itemToDto(item, null, null, null), 1)
         );
 
@@ -235,8 +235,8 @@ public class ItemServiceTest {
                 .when(memoryRequest.findById(anyInt()))
                 .thenReturn(Optional.empty());
 
-        NotFoundException e = Assertions.assertThrows(
-                NotFoundException.class,
+        NewEx e = Assertions.assertThrows(
+                NewEx.class,
                 () -> itemService.postItem(itemToDto(item, null, null, null), 1)
         );
 
