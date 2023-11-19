@@ -23,7 +23,6 @@ public class ItemController {
     @PostMapping("/{userId}")
     public ItemDto postItem(
             @PathVariable Integer userId,
-            //@RequestHeader("X-Sharer-User-Id") int userId,
             @RequestBody @Valid ItemDto itemDto
     ) {
         return itemService.postItem(itemDto, userId);
