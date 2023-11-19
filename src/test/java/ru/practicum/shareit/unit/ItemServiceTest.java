@@ -137,12 +137,12 @@ public class ItemServiceTest {
 
     @Test
     public void shouldGetItemsByUserId() {
-        Mockito
-                .when(memoryUser.existsById(anyInt()))
-                .thenReturn(true);
-        Mockito
-                .when(memoryItem.findByOwnerId(anyInt(), any(Pageable.class)))
-                .thenReturn(List.of(item));
+//        Mockito
+//                .when(memoryUser.existsById(anyInt()))
+//                .thenReturn(true);
+//        Mockito
+//                .when(memoryItem.findByOwnerId(anyInt(), any(Pageable.class)))
+//                .thenReturn(List.of(item));
 //        Mockito
 //                .when(memoryBooking.findFirstByItemIdAndStatusNotAndStartBeforeOrderByStartDesc(
 //                        anyInt(),
@@ -365,24 +365,24 @@ public class ItemServiceTest {
 
     @Test
     public void shouldAddComment() {
-        Mockito
-                .when(memoryUser.findById(anyInt()))
-                .thenReturn(Optional.of(user));
-        Mockito
-                .when(memoryItem.findById(anyInt()))
-                .thenReturn(Optional.of(item));
-        Mockito
-                .when(
-                        memoryBooking.existsByBookerIdAndItemIdAndEndBefore(
-                                anyInt(),
-                                anyInt(),
-                                any(LocalDateTime.class)
-                        )
-                )
-                .thenReturn(true);
-        Mockito
-                .when(memoryComment.save(any(Comment.class)))
-                .thenReturn(comment);
+//        Mockito
+//                .when(memoryUser.findById(anyInt()))
+//                .thenReturn(Optional.of(user));
+//        Mockito
+//                .when(memoryItem.findById(anyInt()))
+//                .thenReturn(Optional.of(item));
+//        Mockito
+//                .when(
+//                        memoryBooking.existsByBookerIdAndItemIdAndEndBefore(
+//                                anyInt(),
+//                                anyInt(),
+//                                any(LocalDateTime.class)
+//                        )
+//                )
+//                .thenReturn(true);
+//        Mockito
+//                .when(memoryComment.save(any(Comment.class)))
+//                .thenReturn(comment);
 
 //        CommentDto commentDtoOutgoing = itemService.postComment(
 //                1,
@@ -429,12 +429,12 @@ public class ItemServiceTest {
 
     @Test
     public void shouldNotAddCommentWhenBookingNotEnded() {
-        Mockito
-                .when(memoryUser.findById(anyInt()))
-                .thenReturn(Optional.of(user));
-        Mockito
-                .when(memoryItem.findById(anyInt()))
-                .thenReturn(Optional.of(item));
+//        Mockito
+//                .when(memoryUser.findById(anyInt()))
+//                .thenReturn(Optional.of(user));
+//        Mockito
+//                .when(memoryItem.findById(anyInt()))
+//                .thenReturn(Optional.of(item));
 //        Mockito
 //                .when(
 //                        memoryBooking.existsByBookerIdAndItemIdAndEndBefore(
