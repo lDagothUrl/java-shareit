@@ -48,9 +48,14 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto postItem(ItemDto itemDto, int userId) {
         log.info("Create new Item: \n{}\nowner: {}", itemDto, userId);
-        User user = memoryUser.findById(userId)
-                .orElseThrow(() -> new NotFoundUserException("Not found userId: " + userId));
-        Item item = memoryItem.save(ItemMapper.itemFromDto(itemDto, user, getRequest(itemDto.getRequestId())));
+        Item item = null;
+        try {
+            User user = memoryUser.findById(userId)
+                    .orElseThrow(() -> new NotFoundUserException("Not found userId: " + userId));
+            item = memoryItem.save(ItemMapper.itemFromDto(itemDto, user, getRequest(itemDto.getRequestId())));
+        } catch (Exception e){
+            throw new NewEx(e.getMessage());
+        }
         return itemToDto(item, null, null, null);
     }
 

@@ -37,4 +37,11 @@ public class ErrorHandler {
         log.error(e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONTINUE)
+    public ErrorResponse handleOwnerItemException(NewEx e) {
+        log.error(e.getMessage());
+        return new ErrorResponse(e.getMessage());
+    }
 }

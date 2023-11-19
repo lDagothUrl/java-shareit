@@ -83,7 +83,7 @@ public class ItemControllerTest {
                 .when(itemService.postItem(any(ItemDto.class), anyInt()))
                 .thenReturn(itemDto);
 
-        mvc.perform(post("/items/1")
+        mvc.perform(post("/items")
                         .content(mapper.writeValueAsString(itemDto))
                         .header("X-Sharer-User-Id", 1)
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -97,7 +97,7 @@ public class ItemControllerTest {
 
     @Test
     public void shouldNotPostItemWhenBlankName() throws Exception {
-        mvc.perform(post("/items/1")
+        mvc.perform(post("/items")
                         .content(mapper.writeValueAsString(
                                 new ItemDto(
                                         1,
@@ -119,7 +119,7 @@ public class ItemControllerTest {
 
     @Test
     public void shouldNotPostItemWhenBlankDescription() throws Exception {
-        mvc.perform(post("/items/1")
+        mvc.perform(post("/items")
                         .content(mapper.writeValueAsString(
                                 new ItemDto(
                                         1,
@@ -141,7 +141,7 @@ public class ItemControllerTest {
 
     @Test
     public void shouldNotPostItemWhenIsAvailableNull() throws Exception {
-        mvc.perform(post("/items/1")
+        mvc.perform(post("/items")
                         .content(mapper.writeValueAsString(
                                 new ItemDto(
                                         1,
