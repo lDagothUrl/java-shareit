@@ -68,7 +68,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void shouldAddUser() throws Exception {
+    public void shouldPostUser() throws Exception {
         Mockito
                 .when(userService.postUser(any(UserDto.class)))
                 .then(returnsFirstArg());
@@ -85,7 +85,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void shouldNotAddUserWhenBlankName() throws Exception {
+    public void shouldNotPostUserWhenBlankName() throws Exception {
         mvc.perform(post("/users")
                         .content(mapper.writeValueAsString(new UserDto(1, "", "user1@email.com")))
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -95,7 +95,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void shouldNotAddUserWhenBlankEmail() throws Exception {
+    public void shouldNotPostUserWhenBlankEmail() throws Exception {
         mvc.perform(post("/users")
                         .content(mapper.writeValueAsString(new UserDto(1, "user1", "")))
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -105,7 +105,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void shouldNotAddUserWhenIncorrectEmail() throws Exception {
+    public void shouldNotPostUserWhenIncorrectEmail() throws Exception {
         mvc.perform(post("/users")
                         .content(mapper.writeValueAsString(new UserDto(1, "user1", "email.com")))
                         .characterEncoding(StandardCharsets.UTF_8)

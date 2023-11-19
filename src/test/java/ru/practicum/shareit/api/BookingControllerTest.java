@@ -90,7 +90,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    public void shouldNotAddBookingWhenStartNull() throws Exception {
+    public void shouldNotPostBookingWhenStartNull() throws Exception {
         mvc.perform(post("/bookings")
                         .content(mapper.writeValueAsString(
                                 new BookingDtoDefault(
@@ -109,7 +109,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    public void shouldNotAddBookingWhenStartBeforeNow() throws Exception {
+    public void shouldNotPostBookingWhenStartBeforeNow() throws Exception {
         mvc.perform(post("/bookings")
                         .content(mapper.writeValueAsString(
                                 new BookingDtoDefault(
@@ -128,7 +128,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    public void shouldNotAddBookingWhenEndNull() throws Exception {
+    public void shouldNotPostBookingWhenEndNull() throws Exception {
         mvc.perform(post("/bookings")
                         .content(mapper.writeValueAsString(
                                 new BookingDtoDefault(
@@ -147,7 +147,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    public void shouldNotAddBookingWhenEndBeforeNow() throws Exception {
+    public void shouldNotPostBookingWhenEndBeforeNow() throws Exception {
         mvc.perform(post("/bookings")
                         .content(mapper.writeValueAsString(
                                 new BookingDtoDefault(
@@ -166,7 +166,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    public void shouldNotAddBookingWhenItemIdNull() throws Exception {
+    public void shouldNotPostBookingWhenItemIdNull() throws Exception {
         mvc.perform(post("/bookings")
                         .content(mapper.writeValueAsString(
                                 new BookingDtoDefault(
@@ -185,7 +185,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    public void shouldApproveBooking() throws Exception {
+    public void shouldPutBooking() throws Exception {
         Mockito
                 .when(bookingService.putBooking(anyInt(), anyInt(), anyBoolean()))
                 .thenReturn(bookingDtoOutgoing);

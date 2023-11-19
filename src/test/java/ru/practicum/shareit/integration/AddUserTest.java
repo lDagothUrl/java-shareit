@@ -27,7 +27,7 @@ public class AddUserTest {
     private final UserDto userDto = new UserDto(null, "user1", "user1@email.com");
 
     @Test
-    public void shouldAddUser() {
+    public void shouldPostUser() {
         userService.postUser(userDto);
         TypedQuery<User> query = em.createQuery("select u from User u where u.email = :email", User.class);
         User user = query.setParameter("email", userDto.getEmail()).getSingleResult();

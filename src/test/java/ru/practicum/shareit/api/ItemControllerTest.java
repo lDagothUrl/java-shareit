@@ -78,7 +78,7 @@ public class ItemControllerTest {
     }
 
     @Test
-    public void shouldAddItem() throws Exception {
+    public void shouldPostItem() throws Exception {
         Mockito
                 .when(itemService.postItem(any(ItemDto.class), anyInt()))
                 .thenReturn(itemDto);
@@ -96,7 +96,7 @@ public class ItemControllerTest {
     }
 
     @Test
-    public void shouldNotAddItemWhenBlankName() throws Exception {
+    public void shouldNotPostItemWhenBlankName() throws Exception {
         mvc.perform(post("/items")
                         .content(mapper.writeValueAsString(
                                 new ItemDto(
@@ -118,7 +118,7 @@ public class ItemControllerTest {
     }
 
     @Test
-    public void shouldNotAddItemWhenBlankDescription() throws Exception {
+    public void shouldNotPostItemWhenBlankDescription() throws Exception {
         mvc.perform(post("/items")
                         .content(mapper.writeValueAsString(
                                 new ItemDto(
@@ -140,7 +140,7 @@ public class ItemControllerTest {
     }
 
     @Test
-    public void shouldNotAddItemWhenIsAvailableNull() throws Exception {
+    public void shouldNotPostItemWhenIsAvailableNull() throws Exception {
         mvc.perform(post("/items")
                         .content(mapper.writeValueAsString(
                                 new ItemDto(
@@ -190,7 +190,7 @@ public class ItemControllerTest {
     }
 
     @Test
-    public void shouldFindItems() throws Exception {
+    public void shouldGetItems() throws Exception {
         Mockito
                 .when(itemService.getItem(anyString(), anyInt(), anyInt()))
                 .thenReturn(List.of(itemDto));
@@ -208,7 +208,7 @@ public class ItemControllerTest {
     }
 
     @Test
-    public void shouldAddComment() throws Exception {
+    public void shouldPostComment() throws Exception {
         CommentDto commentDto = new CommentDto(
                 1,
                 "test comment text",
@@ -233,7 +233,7 @@ public class ItemControllerTest {
     }
 
     @Test
-    public void shouldNotAddCommentWhenBlankText() throws Exception {
+    public void shouldNotPostCommentWhenBlankText() throws Exception {
         CommentDto commentDto = new CommentDto(
                 1,
                 "",

@@ -42,7 +42,7 @@ public class ItemRequestControllerTest {
     );
 
     @Test
-    public void shouldAddItemRequest() throws Exception {
+    public void shouldPostItemRequest() throws Exception {
         Mockito
                 .when(requestService.addItemRequest(anyInt(), any(RequestDto.class)))
                 .thenReturn(itemRequestDto);
@@ -60,7 +60,7 @@ public class ItemRequestControllerTest {
     }
 
     @Test
-    public void shouldNotAddItemRequestWhenBlankDescription() throws Exception {
+    public void shouldNotPostItemRequestWhenBlankDescription() throws Exception {
         mvc.perform(post("/requests")
                         .content(mapper.writeValueAsString(
                                 new RequestDto(
