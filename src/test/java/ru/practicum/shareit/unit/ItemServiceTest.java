@@ -10,12 +10,12 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingDtoDefault;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.MemoryBooking;
-import ru.practicum.shareit.exception.model.NotFoundException;
-import ru.practicum.shareit.exception.model.NotFoundItemException;
-import ru.practicum.shareit.exception.model.NotFoundUserException;
+import ru.practicum.shareit.exception.model.*;
 import ru.practicum.shareit.item.model.comment.Comment;
+import ru.practicum.shareit.item.model.comment.CommentDto;
 import ru.practicum.shareit.item.model.item.Item;
 import ru.practicum.shareit.item.model.item.ItemDto;
 import ru.practicum.shareit.item.repository.MemoryComment;
@@ -37,6 +37,8 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static ru.practicum.shareit.booking.model.BookingMapper.bookingFromDto;
+import static ru.practicum.shareit.booking.model.BookingStatus.*;
 import static ru.practicum.shareit.item.model.comment.CommentMapper.commentToDto;
 import static ru.practicum.shareit.item.model.item.ItemMapper.itemToDto;
 
@@ -137,42 +139,39 @@ public class ItemServiceTest {
 
     @Test
     public void shouldGetItemsByUserId() {
-//        Mockito
-//                .when(memoryUser.existsById(anyInt()))
-//                .thenReturn(true);
-//        Mockito
-//                .when(memoryItem.findByOwnerId(anyInt(), any(Pageable.class)))
-//                .thenReturn(List.of(item));
-//        Mockito
-//                .when(memoryBooking.findFirstByItemIdAndStatusNotAndStartBeforeOrderByStartDesc(
-//                        anyInt(),
-//                        any(BookingStatus.class),
-//                        any(LocalDateTime.class)
-//                ))
-//                .thenReturn(null);
-//        Mockito
-//                .when(memoryBooking.findFirstByItemIdAndStatusNotAndStartAfterOrderByStartAsc(
-//                        anyInt(),
-//                        any(BookingStatus.class),
-//                        any(LocalDateTime.class)
-//                ))
-//                .thenReturn(booking);
-//        Mockito
-//                .when(memoryComment.findByItemIdOrderByCreatedDesc(anyInt()))
-//                .thenReturn(List.of(comment));
-//
-//        List<ItemDto> items = itemService.getItems(1, 0, 5);
-//        ItemDto itemDtoOutgoing = items.get(0);
-//
-//        assertThat(items.size(), equalTo(1));
-//        assertThat(itemDtoOutgoing.getId(), equalTo(item.getId()));
-//        assertThat(itemDtoOutgoing.getName(), equalTo(item.getName()));
-//        assertThat(itemDtoOutgoing.getDescription(), equalTo(item.getDescription()));
-//        assertThat(itemDtoOutgoing.getIsAvailable(), equalTo(item.getIsAvailable()));
-//        assertThat(itemDtoOutgoing.getRequestId(), equalTo(item.getRequest().getId()));
-//        assertThat(itemDtoOutgoing.getLastBooking(), nullValue());
-//        assertThat(itemDtoOutgoing.getComments().size(), equalTo(1));
-//        assertThat(itemDtoOutgoing.getComments().get(0).getId(), equalTo(comment.getId()));
+        Mockito
+                .when(memoryUser.existsById(anyInt()))
+                .thenReturn(true);
+        Mockito
+                .when(memoryItem.findByOwnerId(anyInt(), any(Pageable.class)))
+                .thenReturn(List.of(item));
+        Mockito
+                .when(memoryBooking.findAllByItemOwnerIdInAndStatusNotOrderByStart(
+                        List.of(1), REJECTED
+                ))
+                .thenReturn(List.of());
+        Mockito
+                .when(memoryComment.findByItemIdOrderByCreatedDesc(anyInt()))
+                .thenReturn(List.of(comment));
+
+        List<ItemDto> items = itemService.getItems(1, 0, 5);
+        ItemDto itemDtoOutgoing = items.get(0);
+        Mockito
+                .when(memoryBooking.findAllByItemOwnerIdInAndStatusNotOrderByStart(
+                        List.of(1), REJECTED
+                ))
+                .thenReturn(List.of(booking, booking, booking));
+        itemService.getItems(1, 0, 5);
+
+        assertThat(items.size(), equalTo(1));
+        assertThat(itemDtoOutgoing.getId(), equalTo(item.getId()));
+        assertThat(itemDtoOutgoing.getName(), equalTo(item.getName()));
+        assertThat(itemDtoOutgoing.getDescription(), equalTo(item.getDescription()));
+        assertThat(itemDtoOutgoing.getIsAvailable(), equalTo(item.getIsAvailable()));
+        assertThat(itemDtoOutgoing.getRequestId(), equalTo(item.getRequest().getId()));
+        assertThat(itemDtoOutgoing.getLastBooking(), nullValue());
+        assertThat(itemDtoOutgoing.getComments().size(), equalTo(1));
+        assertThat(itemDtoOutgoing.getComments().get(0).getId(), equalTo(comment.getId()));
     }
 
     @Test
@@ -256,7 +255,7 @@ public class ItemServiceTest {
                 .when(memoryItem.save(any(Item.class)))
                 .then(returnsFirstArg());
 
-        ItemDto itemDtoOutgoing = itemService.putItem(1, itemToDto(item, null, null, null), 1);
+        ItemDto itemDtoOutgoing = itemService.putItem(1, itemToDto(new Item(1, null, null, null, user, request), null, null, null), 1);
 
         assertThat(itemDtoOutgoing.getId(), equalTo(item.getId()));
         assertThat(itemDtoOutgoing.getName(), equalTo(item.getName()));
@@ -313,6 +312,20 @@ public class ItemServiceTest {
     }
 
     @Test
+    public void shouldNotUpdateOwnerItemException() {
+        Mockito
+                .when(memoryItem.findById(anyInt()))
+                .thenReturn(Optional.of(item));
+
+        OwnerItemException e = Assertions.assertThrows(
+                OwnerItemException.class,
+                () -> itemService.putItem(1, itemToDto(item, null, null, null), 2)
+        );
+
+        assertThat(e.getMessage(), equalTo("No access userId: 2 itemId: 1"));
+    }
+
+    @Test
     public void shouldDeleteItem() {
         Mockito
                 .when(memoryUser.existsById(anyInt()))
@@ -365,35 +378,51 @@ public class ItemServiceTest {
 
     @Test
     public void shouldAddComment() {
-//        Mockito
-//                .when(memoryUser.findById(anyInt()))
-//                .thenReturn(Optional.of(user));
-//        Mockito
-//                .when(memoryItem.findById(anyInt()))
-//                .thenReturn(Optional.of(item));
-//        Mockito
-//                .when(
-//                        memoryBooking.existsByBookerIdAndItemIdAndEndBefore(
-//                                anyInt(),
-//                                anyInt(),
-//                                any(LocalDateTime.class)
-//                        )
-//                )
-//                .thenReturn(true);
-//        Mockito
-//                .when(memoryComment.save(any(Comment.class)))
-//                .thenReturn(comment);
+        Mockito
+                .when(memoryUser.findById(anyInt()))
+                .thenReturn(Optional.of(user));
+        Mockito
+                .when(memoryItem.findById(anyInt()))
+                .thenReturn(Optional.of(item));
+        Mockito
+                .when(
+                        memoryBooking.existsByBookerIdAndItemIdAndEndBefore(
+                                anyInt(),
+                                anyInt(),
+                                any(LocalDateTime.class)
+                        )
+                )
+                .thenReturn(true);
+        Mockito
+                .when(
+                        memoryBooking.findByBookerIdAndItemId(
+                                anyInt(),
+                                anyInt())
+                )
+                .thenReturn(List.of(
+                        bookingFromDto(new BookingDtoDefault(
+                                1,
+                                LocalDateTime.now().plusDays(1),
+                                LocalDateTime.now().plusDays(2),
+                                1,
+                                1,
+                                APPROVED
+                        ), user, item)
+                ));
+        Mockito
+                .when(memoryComment.save(any(Comment.class)))
+                .thenReturn(comment);
 
-//        CommentDto commentDtoOutgoing = itemService.postComment(
-//                1,
-//                1,
-//                commentToDto(comment, user.getName())
-//        );
-//
-//        assertThat(commentDtoOutgoing.getId(), equalTo(comment.getId()));
-//        assertThat(commentDtoOutgoing.getText(), equalTo(comment.getText()));
-//        assertThat(commentDtoOutgoing.getAuthorName(), equalTo(comment.getAuthor().getName()));
-//        assertThat(commentDtoOutgoing.getCreated(), equalTo(comment.getCreated()));
+        CommentDto commentDtoOutgoing = itemService.postComment(
+                1,
+                1,
+                commentToDto(comment, user.getName())
+        );
+
+        assertThat(commentDtoOutgoing.getId(), equalTo(comment.getId()));
+        assertThat(commentDtoOutgoing.getText(), equalTo(comment.getText()));
+        assertThat(commentDtoOutgoing.getAuthorName(), equalTo(comment.getAuthor().getName()));
+        assertThat(commentDtoOutgoing.getCreated(), equalTo(comment.getCreated()));
     }
 
     @Test
@@ -429,27 +458,43 @@ public class ItemServiceTest {
 
     @Test
     public void shouldNotAddCommentWhenBookingNotEnded() {
-//        Mockito
-//                .when(memoryUser.findById(anyInt()))
-//                .thenReturn(Optional.of(user));
-//        Mockito
-//                .when(memoryItem.findById(anyInt()))
-//                .thenReturn(Optional.of(item));
-//        Mockito
-//                .when(
-//                        memoryBooking.existsByBookerIdAndItemIdAndEndBefore(
-//                                anyInt(),
-//                                anyInt(),
-//                                any(LocalDateTime.class)
-//                        )
-//                )
-//                .thenReturn(false);
-//
-//        BookingTimeException e = Assertions.assertThrows(
-//                BookingTimeException.class,
-//                () -> itemService.postComment(1, 1, commentToDto(comment, user.getName()))
-//        );
-//
-//        assertThat(e.getMessage(), equalTo("Error booking"));
+        Mockito
+                .when(memoryUser.findById(anyInt()))
+                .thenReturn(Optional.of(user));
+        Mockito
+                .when(memoryItem.findById(anyInt()))
+                .thenReturn(Optional.of(item));
+        Mockito
+                .when(
+                        memoryBooking.existsByBookerIdAndItemIdAndEndBefore(
+                                anyInt(),
+                                anyInt(),
+                                any(LocalDateTime.class)
+                        )
+                )
+                .thenReturn(false);
+        Mockito
+                .when(
+                        memoryBooking.findByBookerIdAndItemId(
+                                anyInt(),
+                                anyInt())
+                )
+                .thenReturn(List.of(
+                        bookingFromDto(new BookingDtoDefault(
+                                1,
+                                LocalDateTime.now().plusDays(1),
+                                LocalDateTime.now().plusDays(2),
+                                1,
+                                1,
+                                APPROVED
+                        ), user, item)
+                ));
+
+        BookingTimeException e = Assertions.assertThrows(
+                BookingTimeException.class,
+                () -> itemService.postComment(1, 1, commentToDto(comment, user.getName()))
+        );
+
+        assertThat(e.getMessage(), equalTo("Error booking"));
     }
 }

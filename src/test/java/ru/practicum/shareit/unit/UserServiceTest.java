@@ -118,7 +118,7 @@ public class UserServiceTest {
                 .when(memoryUser.save(any(User.class)))
                 .then(returnsFirstArg());
 
-        UserDto userDtoOutgoing = userService.putUser(user.getId(), userToDto(user));
+        UserDto userDtoOutgoing = userService.putUser(user.getId(), userToDto(new User(1, null, null)));
 
         assertThat(userDtoOutgoing.getId(), equalTo(user.getId()));
         assertThat(userDtoOutgoing.getName(), equalTo(user.getName()));

@@ -157,13 +157,8 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private boolean intersectionBooking(BookingDtoDefault bookingDtoDefault, Booking booking) {
-        if (booking == null || booking.getStart() == null || booking.getEnd() == null) {
-            return false;
-        }
-        return (booking.getStart().isAfter(bookingDtoDefault.getStart()) && booking.getStart().isBefore(bookingDtoDefault.getEnd()))
-                || (booking.getEnd().isAfter(bookingDtoDefault.getStart()) && booking.getEnd().isBefore(bookingDtoDefault.getEnd()));
+        return (!(booking == null || booking.getStart() == null || booking.getEnd() == null) && ((booking.getStart().isAfter(bookingDtoDefault.getStart()) && booking.getStart().isBefore(bookingDtoDefault.getEnd())) || (booking.getEnd().isAfter(bookingDtoDefault.getStart()) && booking.getEnd().isBefore(bookingDtoDefault.getEnd()))));
     }
-
 
     private Pageable getPageable(int from, int size) {
         int page = from / size;

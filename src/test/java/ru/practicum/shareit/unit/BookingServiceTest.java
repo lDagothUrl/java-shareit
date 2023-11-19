@@ -31,6 +31,8 @@ import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static ru.practicum.shareit.booking.model.BookingMapper.bookingFromDto;
+import static ru.practicum.shareit.booking.model.BookingStatus.REJECTED;
+import static ru.practicum.shareit.booking.model.BookingStatus.WAITING;
 
 @ExtendWith(MockitoExtension.class)
 public class BookingServiceTest {
@@ -66,7 +68,7 @@ public class BookingServiceTest {
                 LocalDateTime.now().plusDays(2),
                 1,
                 1,
-                BookingStatus.WAITING
+                WAITING
         );
     }
 
@@ -189,7 +191,7 @@ public class BookingServiceTest {
                 LocalDateTime.now().plusDays(1),
                 1,
                 1,
-                BookingStatus.WAITING
+                WAITING
         );
 
         BookingTimeException e = Assertions.assertThrows(
@@ -239,7 +241,7 @@ public class BookingServiceTest {
         assertThat(bookingDtoOutgoing.getEnd(), equalTo(bookingDtoDefault.getEnd()));
         assertThat(bookingDtoOutgoing.getItem().getId(), equalTo(bookingDtoDefault.getItemId()));
         assertThat(bookingDtoOutgoing.getBooker().getId(), equalTo(bookingDtoDefault.getBookerId()));
-        assertThat(bookingDtoOutgoing.getStatus(), equalTo(BookingStatus.REJECTED));
+        assertThat(bookingDtoOutgoing.getStatus(), equalTo(REJECTED));
     }
 
     @Test
@@ -423,6 +425,9 @@ public class BookingServiceTest {
                 ));
 
         List<BookingDtoOutgoing> bookings = bookingService.getUserBookings(1, "FUTURE", 0, 5);
+        bookingService.getUserBookings(2, "CURRENT", 0, 5);
+        bookingService.getUserBookings(2, "PAST", 0, 5);
+        bookingService.getUserBookings(2, "REJECTED", 0, 5);
         BookingDtoOutgoing bookingDtoOutgoing = bookings.get(0);
 
         assertThat(bookings.size(), equalTo(1));
@@ -474,6 +479,9 @@ public class BookingServiceTest {
                 ));
 
         List<BookingDtoOutgoing> bookings = bookingService.getOwnerBookings(2, "ALL", 0, 5);
+        bookingService.getOwnerBookings(2, "CURRENT", 0, 5);
+        bookingService.getOwnerBookings(2, "PAST", 0, 5);
+        bookingService.getOwnerBookings(2, "REJECTED", 0, 5);
         BookingDtoOutgoing bookingDtoOutgoing = bookings.get(0);
 
         assertThat(bookings.size(), equalTo(1));

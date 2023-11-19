@@ -85,8 +85,7 @@ public class ItemServiceImpl implements ItemService {
             Booking last = null;
             Booking next = null;
             int i = 2;
-            for (int j = 0; j < bookingList.size(); j++) {
-                Booking booking = bookingList.get(j);
+            for (Booking booking : bookingList) {
                 if (i == 0) {
                     break;
                 }
