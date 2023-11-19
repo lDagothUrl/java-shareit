@@ -37,13 +37,6 @@ public class GetItemRequestsByUserIdTest {
         User user = query.setParameter("email", userDto.getEmail()).getSingleResult();
         int userId = user.getId();
         requestService.addItemRequest(userId, itemRequestDto);
-//        List<RequestDto> itemRequests = requestService.getItemRequestsByUserId(userId);
-//        RequestDto itemRequestDtoOutgoing = itemRequests.get(0);
-//
-//        assertThat(1, equalTo(itemRequests.size()));
-//        assertThat(itemRequestDtoOutgoing.getId(), notNullValue());
-//        assertThat(itemRequestDtoOutgoing.getDescription(), equalTo(itemRequestDto.getDescription()));
-//        assertThat(itemRequestDtoOutgoing.getItems(), equalTo(Collections.emptyList()));
     }
 
     @Test

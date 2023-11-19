@@ -44,19 +44,6 @@ public class GetItemsByUserIdTest {
         TypedQuery<User> query = em.createQuery("select u from User u where u.email = :email", User.class);
         User user = query.setParameter("email", userDto.getEmail()).getSingleResult();
         int userId = user.getId();
-//        itemService.postItem(itemDto, userId);
-//        List<ItemDto> items = itemService.getItems(userId, 0, 5);
-//        ItemDto itemDtoOutgoing = items.get(0);
-//
-//        assertThat(items.size(), equalTo(1));
-//        assertThat(itemDtoOutgoing.getId(), notNullValue());
-//        assertThat(itemDtoOutgoing.getName(), equalTo(itemDto.getName()));
-//        assertThat(itemDtoOutgoing.getDescription(), equalTo(itemDto.getDescription()));
-//        assertThat(itemDtoOutgoing.getIsAvailable(), equalTo(itemDto.getIsAvailable()));
-//        assertThat(itemDtoOutgoing.getRequestId(), nullValue());
-//        assertThat(itemDtoOutgoing.getLastBooking(), nullValue());
-//        assertThat(itemDtoOutgoing.getNextBooking(), nullValue());
-//        assertThat(itemDtoOutgoing.getComments(), equalTo(Collections.emptyList()));
     }
 
     @Test

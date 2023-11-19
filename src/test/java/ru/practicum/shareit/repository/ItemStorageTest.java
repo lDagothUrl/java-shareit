@@ -27,14 +27,5 @@ public class ItemStorageTest {
                 user,
                 null
         );
-//        memoryItem.save(item);
-//        List<Item> items = memoryItem.findByText("item", PageRequest.of(0, 5));
-//
-//        assertThat(items.size(), equalTo(1));
-//        assertThat(items.get(0), equalTo(item));
-//
-//        items = memoryItem.findByText("scissors", PageRequest.of(0, 5));
-//
-//        assertThat(items.size(), equalTo(0));
     }
 }
