@@ -20,9 +20,10 @@ import java.util.List;
 public class ItemController {
     private final ItemService itemService;
 
-    @PostMapping
+    @PostMapping("/{userId}")
     public ItemDto postItem(
-            @RequestHeader("X-Sharer-User-Id") int userId,
+            @PathVariable Integer userId,
+            //@RequestHeader("X-Sharer-User-Id") int userId,
             @RequestBody @Valid ItemDto itemDto
     ) {
         return itemService.postItem(itemDto, userId);
