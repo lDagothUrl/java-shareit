@@ -77,13 +77,7 @@ public class ItemServiceTest {
                 new User(2, "user2", "user2@email.com"),
                 BookingStatus.APPROVED
         );
-        request = new Request(
-                1,
-                "Test item request",
-                new User(3, "user3", "user3@email.com"),
-                LocalDateTime.now(),
-                Collections.emptyList()
-        );
+        request = new Request(1, "Test item request", new User(3, "user3", "user3@email.com"), LocalDateTime.now(), Collections.emptyList());
         item.setRequest(request);
     }
 
