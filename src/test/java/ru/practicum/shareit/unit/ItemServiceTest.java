@@ -77,7 +77,13 @@ public class ItemServiceTest {
                 new User(2, "user2", "user2@email.com"),
                 BookingStatus.APPROVED
         );
-        request = new Request(1, "Test item request", new User(3, "user3", "user3@email.com"), LocalDateTime.now(), Collections.emptyList());
+        request = new Request(
+                1,
+                "Test item request",
+                new User(3, "user3", "user3@email.com"),
+                LocalDateTime.now(),
+                Collections.emptyList()
+        );
         item.setRequest(request);
     }
 
@@ -212,8 +218,8 @@ public class ItemServiceTest {
                 .when(memoryUser.findById(anyInt()))
                 .thenReturn(Optional.empty());
 
-        NewEx e = Assertions.assertThrows(
-                NewEx.class,
+        NotFoundUserException e = Assertions.assertThrows(
+                NotFoundUserException.class,
                 () -> itemService.postItem(itemToDto(item, null, null, null), 1)
         );
 
@@ -229,8 +235,8 @@ public class ItemServiceTest {
                 .when(memoryRequest.findById(anyInt()))
                 .thenReturn(Optional.empty());
 
-        NewEx e = Assertions.assertThrows(
-                NewEx.class,
+        NotFoundException e = Assertions.assertThrows(
+                NotFoundException.class,
                 () -> itemService.postItem(itemToDto(item, null, null, null), 1)
         );
 
