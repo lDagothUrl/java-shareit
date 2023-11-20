@@ -21,7 +21,7 @@ public class Request {
     @Column(length = 2000)
     private String description;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "requestor")
+    @JoinColumn(name = "requestor_id")
     private User requestor;
     private LocalDateTime created;
 }
