@@ -27,7 +27,6 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.MemoryUser;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -81,8 +80,7 @@ public class ItemServiceTest {
                 1,
                 "Test item request",
                 new User(3, "user3", "user3@email.com"),
-                LocalDateTime.now(),
-                Collections.emptyList()
+                LocalDateTime.now()
         );
         item.setRequest(request);
     }

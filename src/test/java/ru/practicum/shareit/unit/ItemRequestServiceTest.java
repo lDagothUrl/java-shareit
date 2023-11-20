@@ -11,6 +11,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.exception.model.NotFoundException;
 import ru.practicum.shareit.exception.model.NotFoundUserException;
+import ru.practicum.shareit.item.model.item.Item;
+import ru.practicum.shareit.item.model.item.ItemMapper;
 import ru.practicum.shareit.item.repository.MemoryItem;
 import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.request.model.RequestDto;
@@ -88,17 +90,31 @@ public class ItemRequestServiceTest {
 
     @Test
     public void shouldGetItemRequestsByUserId() {
+        Request request = itemRequestFromDto(requestDto, user);
+        Item item = new Item(
+                1,
+                "name",
+                "test",
+                true,
+                user,
+                request
+        );
         Mockito
                 .when(memoryUser.existsById(anyInt()))
                 .thenReturn(true);
         Mockito
                 .when(memoryRequest.findByRequestorIdOrderByCreatedDesc(anyInt()))
                 .thenReturn(
-                        List.of(itemRequestFromDto(requestDto, user))
+                        List.of(itemRequestFromDto(new RequestDto(
+                                1,
+                                "Test description",
+                                null,
+                                List.of(ItemMapper.itemToDto(item, null, null, null))
+                        ), user))
                 );
         Mockito
-                .when(memoryItem.findByRequestId(anyInt()))
-                .thenReturn(Collections.emptyList());
+                .when(memoryItem.findAllByRequestRequestorId(anyInt()))
+                .thenReturn(List.of(item));
 
         List<RequestDto> itemRequests = requestService.getItemRequestsByUserId(1);
         RequestDto itemRequestDtoOutgoing = itemRequests.get(0);
@@ -106,7 +122,7 @@ public class ItemRequestServiceTest {
         assertThat(itemRequests.size(), equalTo(1));
         assertThat(itemRequestDtoOutgoing.getId(), equalTo(requestDto.getId()));
         assertThat(itemRequestDtoOutgoing.getDescription(), equalTo(requestDto.getDescription()));
-        assertThat(itemRequestDtoOutgoing.getItems(), equalTo(requestDto.getItems()));
+        assertThat(itemRequestDtoOutgoing.getItems(), equalTo(List.of(ItemMapper.itemToDto(item, null, null, null))));
     }
 
     @Test
@@ -174,7 +190,7 @@ public class ItemRequestServiceTest {
                 .when(memoryItem.findByRequestId(anyInt()))
                 .thenReturn(Collections.emptyList());
 
-        RequestDto itemRequestDtoOutgoing = requestService.getItemRequestById(1,1);
+        RequestDto itemRequestDtoOutgoing = requestService.getItemRequestById(1, 1);
 
         assertThat(itemRequestDtoOutgoing.getId(), equalTo(requestDto.getId()));
         assertThat(itemRequestDtoOutgoing.getDescription(), equalTo(requestDto.getDescription()));
@@ -206,7 +222,7 @@ public class ItemRequestServiceTest {
 
         NotFoundException e = Assertions.assertThrows(
                 NotFoundException.class,
-                () -> requestService.getItemRequestById(1,1)
+                () -> requestService.getItemRequestById(1, 1)
         );
 
         assertThat(e.getMessage(), equalTo("Request requestId: 1"));

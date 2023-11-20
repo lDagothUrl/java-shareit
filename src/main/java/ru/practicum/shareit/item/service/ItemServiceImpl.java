@@ -23,9 +23,9 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.MemoryUser;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.item.model.comment.CommentMapper.commentFromDto;
@@ -79,28 +79,20 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundUserException("Not found userId: " + userId);
         }
         List<Item> itemList = memoryItem.findByOwnerId(userId, getPageable(from, size));
-        List<Booking> bookingList = memoryBooking.findAllByItemOwnerIdInAndStatusNotOrderByStart(itemList.stream().map(item -> item.getOwner().getId()).collect(Collectors.toList()), BookingStatus.REJECTED);//.stream().filter(booking -> booking.getStatus() == BookingStatus.APPROVED).collect(Collectors.toList());
-        List<ItemDto> itemDtoList = new ArrayList<>();
-        for (Item item : itemList) {
-            Booking last = null;
-            Booking next = null;
-            int i = 2;
-            for (Booking booking : bookingList) {
-                if (i == 0) {
-                    break;
-                }
-                if (booking.getItem().equals(item)) {
-                    i--;
-                    if (i == 1) {
-                        last = booking;
-                    } else {
-                        next = booking;
-                    }
-                }
-            }
-            itemDtoList.add(itemToDto(item, last, next, memoryComment.findByItemIdOrderByCreatedDesc(item.getId()).stream().map(comment -> commentToDto(comment, comment.getAuthor().getName())).collect(Collectors.toList())));
-        }
-        return itemDtoList;
+        List<Integer> itemIds = itemList.stream().map(item -> item.getOwner().getId()).collect(Collectors.toList());
+        List<Booking> bookingList = memoryBooking.findAllByItemOwnerIdInAndStatusNotOrderByStart(itemIds, BookingStatus.REJECTED);
+        Map<Item, List<Booking>> bookingsByItem = bookingList.stream()
+                .collect(Collectors.groupingBy(Booking::getItem));
+        return itemList.stream()
+                .map(item -> {
+                    List<Booking> bookings = bookingsByItem.get(item);
+                    Booking next = findNext(bookings);
+                    Booking last = findLast(bookings);
+                    List<CommentDto> comments = memoryComment.findByItemIdOrderByCreatedDesc(item.getId()).stream()
+                            .map(comment -> commentToDto(comment, comment.getAuthor().getName()))
+                            .collect(Collectors.toList());
+                    return itemToDto(item, last, next, comments);
+                }).collect(Collectors.toList());
     }
 
     @Override
@@ -177,5 +169,27 @@ public class ItemServiceImpl implements ItemService {
                     .orElseThrow(() -> new NotFoundException("Not found request requestId: " + requestId));
         }
         return itemRequest;
+    }
+
+    private Booking findLast(List<Booking> bookings) {
+        if (bookings == null) {
+            return null;
+        }
+        Booking booking = null;
+        if (bookings.size() > 0) {
+            booking = bookings.get(0);
+        }
+        return booking;
+    }
+
+    private Booking findNext(List<Booking> bookings) {
+        if (bookings == null) {
+            return null;
+        }
+        Booking booking = null;
+        if (bookings.size() > 1) {
+            booking = bookings.get(1);
+        }
+        return booking;
     }
 }

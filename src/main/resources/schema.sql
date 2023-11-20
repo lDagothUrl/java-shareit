@@ -19,9 +19,9 @@ CREATE TABLE IF NOT EXISTS items (
   description VARCHAR(500) NOT NULL,
   is_available BOOLEAN NOT NULL,
   owner INTEGER NOT NULL,
-  request_id INTEGER,
+  request INTEGER,
   CONSTRAINT fk_items_to_users FOREIGN KEY(owner) REFERENCES users(id),
-  CONSTRAINT fk_items_to_item_requests FOREIGN KEY(request_id) REFERENCES item_requests(id)
+  CONSTRAINT fk_items_to_item_requests FOREIGN KEY(request) REFERENCES item_requests(id)
 );
 
 CREATE TABLE IF NOT EXISTS bookings (

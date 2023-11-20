@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.model.NotFoundException;
 import ru.practicum.shareit.exception.model.NotFoundUserException;
+import ru.practicum.shareit.item.model.item.Item;
+import ru.practicum.shareit.item.model.item.ItemMapper;
 import ru.practicum.shareit.item.repository.MemoryItem;
 import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.request.model.RequestDto;
@@ -15,6 +17,7 @@ import ru.practicum.shareit.request.repository.MemoryRequest;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.MemoryUser;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,7 +38,9 @@ public class RequestServiceImpl implements RequestService {
         log.info("Add request userId: {} request: {}", userId, requestDto);
         User user = memoryUser.findById(userId)
                 .orElseThrow(() -> new NotFoundUserException("Not found userId: " + userId));
-        return itemRequestToDto(memoryRequest.save(itemRequestFromDto(requestDto, user)));
+        return itemRequestToDto(memoryRequest.save(itemRequestFromDto(requestDto, user)),
+                requestDto.getItems() == null ? null : requestDto.getItems().stream().map(request -> ItemMapper.itemFromDto(request, null, null))
+                        .collect(Collectors.toList()));
     }
 
     @Override
@@ -45,11 +50,30 @@ public class RequestServiceImpl implements RequestService {
         if (!memoryUser.existsById(userId)) {
             throw new NotFoundUserException("Not found userId: " + userId);
         }
+
+//        List<Item> items = memoryItem.findAllByRequestRequestorId(userId);
+//        Map<Request, List<Item>> requestListMap = items.stream()
+//                .collect(Collectors.groupingBy(Item::getRequest));
+//        List<RequestDto> requestDtoList = new ArrayList<>();
+//        for (Request request : requestListMap.keySet()){
+//            requestDtoList.add(RequestMapper.itemRequestToDto(request, requestListMap.get(request)));
+//        }
+//        return requestDtoList;
+
+
         List<Request> requestList = memoryRequest.findByRequestorIdOrderByCreatedDesc(userId);
-        return requestList.stream()
-                .peek(request -> request.setItems(memoryItem.findByRequestId(request.getId())))
-                .map(RequestMapper::itemRequestToDto)
-                .collect(Collectors.toList());
+        List<Item> itemList = memoryItem.findAllByRequestRequestorId(userId);
+        List<RequestDto> requestDtoList = new ArrayList<>();
+        for (Request request : requestList) {
+            List<Item> items = new ArrayList<>();
+            for (Item item : itemList) {
+                if (item.getRequest().getId() == request.getId()) {
+                    items.add(item);
+                }
+            }
+            requestDtoList.add(RequestMapper.itemRequestToDto(request, items));
+        }
+        return requestDtoList;
     }
 
     @Override
@@ -61,8 +85,7 @@ public class RequestServiceImpl implements RequestService {
         }
         int page = from / size;
         return memoryRequest.findByRequestorIdNotOrderByCreatedDesc(userId, PageRequest.of(page, size)).stream()
-                .peek(request -> request.setItems(memoryItem.findByRequestId(request.getId())))
-                .map(RequestMapper::itemRequestToDto)
+                .map(request -> RequestMapper.itemRequestToDto(request, memoryItem.findByRequestId(request.getId())))
                 .collect(Collectors.toList());
     }
 
@@ -75,7 +98,6 @@ public class RequestServiceImpl implements RequestService {
         }
         Request request = memoryRequest.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Request requestId: " + requestId));
-        request.setItems(memoryItem.findByRequestId(requestId));
-        return itemRequestToDto(request);
+        return itemRequestToDto(request, memoryItem.findByRequestId(requestId));
     }
 }

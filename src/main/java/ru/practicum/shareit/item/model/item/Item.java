@@ -32,6 +32,6 @@ public class Item {
     @JoinColumn(name = "owner")
     private User owner;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "request_id")
+    @JoinColumn(name = "request")
     private Request request;
 }
