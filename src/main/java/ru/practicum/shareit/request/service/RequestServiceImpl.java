@@ -19,6 +19,7 @@ import ru.practicum.shareit.user.repository.MemoryUser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.request.model.RequestMapper.itemRequestFromDto;
@@ -67,7 +68,7 @@ public class RequestServiceImpl implements RequestService {
         for (Request request : requestList) {
             List<Item> items = new ArrayList<>();
             for (Item item : itemList) {
-                if (item.getRequest().getId() == request.getId()) {
+                if (Objects.equals(item.getRequest().getId(), request.getId())) {
                     items.add(item);
                 }
             }
