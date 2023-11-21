@@ -10,11 +10,11 @@ public interface ItemService {
 
     CommentDto postComment(int userId, int itemId, CommentDto commentDto);
 
-    List<ItemDto> getItems(int owner);
+    List<ItemDto> getItems(int owner, int from, int size);
 
     ItemDto getItem(int userId, int itemId);
 
-    List<ItemDto> getItem(String text);
+    List<ItemDto> getItem(String text, int from, int size);
 
     ItemDto putItem(int id, ItemDto item, int owner);
 

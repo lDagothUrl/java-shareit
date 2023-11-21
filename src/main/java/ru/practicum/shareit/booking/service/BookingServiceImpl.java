@@ -2,6 +2,8 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.*;
@@ -86,7 +88,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingDtoOutgoing> getUserBookings(int userId, String stateString) {
+    public List<BookingDtoOutgoing> getUserBookings(int userId, String stateString, int from, int size) {
         log.info("Get user booking userId: {} status: {}", userId, stateString);
         BookingState state = BookingState.getBookingState(stateString);
         if (!memoryUser.existsById(userId)) {
@@ -96,23 +98,23 @@ public class BookingServiceImpl implements BookingService {
 
         switch (state) {
             case FUTURE:
-                bookings = memoryBooking.findByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now());
+                bookings = memoryBooking.findByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now(), getPageable(from, size));
                 break;
             case CURRENT:
                 LocalDateTime now = LocalDateTime.now();
-                bookings = memoryBooking.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, now, now);
+                bookings = memoryBooking.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, now, now, getPageable(from, size));
                 break;
             case PAST:
-                bookings = memoryBooking.findByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
+                bookings = memoryBooking.findByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now(), getPageable(from, size));
                 break;
             case WAITING:
-                bookings = memoryBooking.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING);
+                bookings = memoryBooking.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING, getPageable(from, size));
                 break;
             case REJECTED:
-                bookings = memoryBooking.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED);
+                bookings = memoryBooking.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED, getPageable(from, size));
                 break;
             default:
-                bookings = memoryBooking.findByBookerIdOrderByStartDesc(userId);
+                bookings = memoryBooking.findByBookerIdOrderByStartDesc(userId, getPageable(from, size));
         }
 
         return bookings.stream()
@@ -122,7 +124,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingDtoOutgoing> getOwnerBookings(int userId, String stateString) {
+    public List<BookingDtoOutgoing> getOwnerBookings(int userId, String stateString, int from, int size) {
         log.info("Get owner bookings userId: {} state: {}", userId, stateString);
         BookingState state = BookingState.getBookingState(stateString);
         if (!memoryUser.existsById(userId)) {
@@ -131,23 +133,23 @@ public class BookingServiceImpl implements BookingService {
         List<Booking> bookings;
         switch (state) {
             case FUTURE:
-                bookings = memoryBooking.findByItemOwnerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now());
+                bookings = memoryBooking.findByItemOwnerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now(), getPageable(from, size));
                 break;
             case CURRENT:
                 LocalDateTime now = LocalDateTime.now();
-                bookings = memoryBooking.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, now, now);
+                bookings = memoryBooking.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, now, now, getPageable(from, size));
                 break;
             case PAST:
-                bookings = memoryBooking.findByItemOwnerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
+                bookings = memoryBooking.findByItemOwnerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now(), getPageable(from, size));
                 break;
             case WAITING:
-                bookings = memoryBooking.findByItemOwnerIdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING);
+                bookings = memoryBooking.findByItemOwnerIdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING, getPageable(from, size));
                 break;
             case REJECTED:
-                bookings = memoryBooking.findByItemOwnerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED);
+                bookings = memoryBooking.findByItemOwnerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED, getPageable(from, size));
                 break;
             default:
-                bookings = memoryBooking.findByItemOwnerIdOrderByStartDesc(userId);
+                bookings = memoryBooking.findByItemOwnerIdOrderByStartDesc(userId, getPageable(from, size));
         }
         return bookings.stream()
                 .map(BookingMapper::bookingToDtoOutgoing)
@@ -155,12 +157,11 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private boolean intersectionBooking(BookingDtoDefault bookingDtoDefault, Booking booking) {
-        if (booking == null || booking.getStart() == null || booking.getEnd() == null) {
-            return false;
-        } else if ((booking.getStart().isAfter(bookingDtoDefault.getStart()) && booking.getStart().isBefore(bookingDtoDefault.getEnd()))
-                || (booking.getEnd().isAfter(bookingDtoDefault.getStart()) && booking.getEnd().isBefore(bookingDtoDefault.getEnd()))) {
-            return true;
-        }
-        return false;
+        return (!(booking == null || booking.getStart() == null || booking.getEnd() == null) && ((booking.getStart().isAfter(bookingDtoDefault.getStart()) && booking.getStart().isBefore(bookingDtoDefault.getEnd())) || (booking.getEnd().isAfter(bookingDtoDefault.getStart()) && booking.getEnd().isBefore(bookingDtoDefault.getEnd()))));
+    }
+
+    private Pageable getPageable(int from, int size) {
+        int page = from / size;
+        return PageRequest.of(page, size);
     }
 }
