@@ -104,14 +104,7 @@ public class ItemRequestServiceTest {
                 .thenReturn(true);
         Mockito
                 .when(memoryRequest.findByRequestorIdOrderByCreatedDesc(anyInt()))
-                .thenReturn(
-                        List.of(itemRequestFromDto(new RequestDto(
-                                1,
-                                "Test description",
-                                null,
-                                List.of(ItemMapper.itemToDto(item, null, null, null))
-                        ), user))
-                );
+                .thenReturn(List.of(request));
         Mockito
                 .when(memoryItem.findAllByRequestRequestorId(anyInt()))
                 .thenReturn(List.of(item));
@@ -150,7 +143,7 @@ public class ItemRequestServiceTest {
                         List.of(itemRequestFromDto(requestDto, user))
                 );
         Mockito
-                .when(memoryItem.findByRequestId(anyInt()))
+                .when(memoryItem.findAllByRequestRequestorIdIn(any()))
                 .thenReturn(Collections.emptyList());
 
         List<RequestDto> itemRequests = requestService.getAllItemRequests(1, 0, 5);

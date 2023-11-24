@@ -6,9 +6,6 @@ import ru.practicum.shareit.item.model.comment.CommentDto;
 import ru.practicum.shareit.item.model.item.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 /**
@@ -23,7 +20,7 @@ public class ItemController {
     @PostMapping
     public ItemDto postItem(
             @RequestHeader("X-Sharer-User-Id") int userId,
-            @RequestBody @Valid ItemDto itemDto
+            @RequestBody ItemDto itemDto
     ) {
         return itemService.postItem(itemDto, userId);
     }
@@ -32,7 +29,7 @@ public class ItemController {
     public CommentDto postComment(
             @RequestHeader("X-Sharer-User-Id") Integer userId,
             @PathVariable Integer itemId,
-            @RequestBody @Valid CommentDto commentDto
+            @RequestBody CommentDto commentDto
     ) {
         return itemService.postComment(userId, itemId, commentDto);
     }
@@ -48,8 +45,8 @@ public class ItemController {
     @GetMapping
     public List<ItemDto> getItemsUser(
             @RequestHeader("X-Sharer-User-Id") int userId,
-            @RequestParam(defaultValue = "0") @PositiveOrZero int from,
-            @RequestParam(defaultValue = "10") @Positive int size
+            @RequestParam(defaultValue = "0") int from,
+            @RequestParam(defaultValue = "10") int size
     ) {
         return itemService.getItems(userId, from, size);
     }
@@ -57,8 +54,8 @@ public class ItemController {
     @GetMapping("/search")
     public List<ItemDto> getItems(
             @RequestParam String text,
-            @RequestParam(defaultValue = "0") @PositiveOrZero int from,
-            @RequestParam(defaultValue = "10") @Positive int size
+            @RequestParam(defaultValue = "0") int from,
+            @RequestParam(defaultValue = "10") int size
     ) {
         return itemService.getItem(text, from, size);
     }

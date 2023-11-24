@@ -19,9 +19,7 @@ public interface MemoryItem extends JpaRepository<Item, Integer> {
 
     List<Item> findByRequestId(int requestId);
 
-//    List<Item> findByOwnerId(int userId);
-
     List<Item> findAllByRequestRequestorId(Integer requestorId);
 
-    List<Item> findAllByRequestIdIn(List<Integer> itemsId);
+    List<Item> findAllByRequestRequestorIdIn(List<Integer> userId);
 }

@@ -17,9 +17,7 @@ import ru.practicum.shareit.request.repository.MemoryRequest;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.MemoryUser;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.request.model.RequestMapper.itemRequestFromDto;
@@ -51,30 +49,9 @@ public class RequestServiceImpl implements RequestService {
         if (!memoryUser.existsById(userId)) {
             throw new NotFoundUserException("Not found userId: " + userId);
         }
-
-//        List<Item> items = memoryItem.findAllByRequestRequestorId(userId);
-//        Map<Request, List<Item>> requestListMap = items.stream()
-//                .collect(Collectors.groupingBy(Item::getRequest));
-//        List<RequestDto> requestDtoList = new ArrayList<>();
-//        for (Request request : requestListMap.keySet()) {
-//            requestDtoList.add(RequestMapper.itemRequestToDto(request, requestListMap.get(request)));
-//        }
-//        return requestDtoList;
-
-
         List<Request> requestList = memoryRequest.findByRequestorIdOrderByCreatedDesc(userId);
-        List<Item> itemList = memoryItem.findAllByRequestRequestorId(userId);
-        List<RequestDto> requestDtoList = new ArrayList<>();
-        for (Request request : requestList) {
-            List<Item> items = new ArrayList<>();
-            for (Item item : itemList) {
-                if (Objects.equals(item.getRequest().getId(), request.getId())) {
-                    items.add(item);
-                }
-            }
-            requestDtoList.add(RequestMapper.itemRequestToDto(request, items));
-        }
-        return requestDtoList;
+        List<Item> items = memoryItem.findAllByRequestRequestorId(userId);
+        return transformationItemRequest(requestList, items);
     }
 
     @Override
@@ -85,9 +62,9 @@ public class RequestServiceImpl implements RequestService {
             throw new NotFoundUserException("Not found userId: " + userId);
         }
         int page = from / size;
-        return memoryRequest.findByRequestorIdNotOrderByCreatedDesc(userId, PageRequest.of(page, size)).stream()
-                .map(request -> RequestMapper.itemRequestToDto(request, memoryItem.findByRequestId(request.getId())))
-                .collect(Collectors.toList());
+        List<Request> requestList = memoryRequest.findByRequestorIdNotOrderByCreatedDesc(userId, PageRequest.of(page, size));
+        List<Item> items = memoryItem.findAllByRequestRequestorIdIn(requestList.stream().map(Request::getId).collect(Collectors.toList()));
+        return transformationItemRequest(requestList, items);
     }
 
     @Override
@@ -100,5 +77,28 @@ public class RequestServiceImpl implements RequestService {
         Request request = memoryRequest.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Request requestId: " + requestId));
         return itemRequestToDto(request, memoryItem.findByRequestId(requestId));
+    }
+
+    private List<RequestDto> transformationItemRequest(List<Request> requestList, List<Item> items) {
+        Map<Request, List<Item>> requestListMap = new HashMap<>();
+        for (Request request : requestList) {
+            requestListMap.put(request, null);
+        }
+        for (Item item : items) {
+            if (item.getRequest() != null) {
+                List<Item> itemRequest = requestListMap.get(item.getRequest());
+                if (itemRequest == null) {
+                    itemRequest = new ArrayList<>();
+                }
+                itemRequest.add(item);
+                requestListMap.put(item.getRequest(), itemRequest);
+            }
+        }
+        List<RequestDto> requestDtoList = new ArrayList<>();
+        for (Request request : requestListMap.keySet()) {
+            requestDtoList.add(RequestMapper.itemRequestToDto(request, requestListMap.get(request)));
+        }
+        return requestDtoList.stream().sorted(Comparator
+                .comparing(RequestDto::getId)).collect(Collectors.toList());
     }
 }

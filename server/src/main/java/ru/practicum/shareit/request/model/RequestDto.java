@@ -7,7 +7,6 @@ package ru.practicum.shareit.request.model;
 import lombok.*;
 import ru.practicum.shareit.item.model.item.ItemDto;
 
-import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,7 +18,6 @@ import java.util.List;
 @ToString
 public class RequestDto {
     private Integer id;
-    @NotBlank
     private String description;
     private LocalDateTime created;
     private List<ItemDto> items;

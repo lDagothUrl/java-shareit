@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
@@ -14,7 +13,6 @@ import java.time.LocalDateTime;
 @ToString
 public class CommentDto {
     private Integer id;
-    @NotBlank
     private String text;
     private String authorName;
     private LocalDateTime created;
