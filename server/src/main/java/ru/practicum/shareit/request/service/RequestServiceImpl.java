@@ -81,9 +81,6 @@ public class RequestServiceImpl implements RequestService {
 
     private List<RequestDto> transformationItemRequest(List<Request> requestList, List<Item> items) {
         Map<Request, List<Item>> requestListMap = new HashMap<>();
-        for (Request request : requestList) {
-            requestListMap.put(request, null);
-        }
         for (Item item : items) {
             if (item.getRequest() != null) {
                 List<Item> itemRequest = requestListMap.get(item.getRequest());
